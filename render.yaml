@@ -9,6 +9,8 @@ services:
     dockerfilePath: ./apps/server/Dockerfile
     dockerContext: .
     plan: free
+    # Même région que la base Neon (Frankfurt) : latence minimale entre l'app et la base.
+    region: frankfurt
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
