@@ -1,9 +1,10 @@
 # Blueprint Render : https://render.com/docs/blueprint-spec
-# La base PostgreSQL est hébergée à part (Neon ou Supabase, offres gratuites durables) :
-# renseigne DATABASE_URL dans le tableau de bord Render.
+# Un seul service web sert l'API, Socket.IO et le front React (même adresse, pas de CORS).
+# La base PostgreSQL est hébergée à part (Neon, offre gratuite durable) :
+# Render demande la valeur de DATABASE_URL lors de la création du Blueprint.
 services:
   - type: web
-    name: quiz-live-server
+    name: quiz-live
     runtime: docker
     dockerfilePath: ./apps/server/Dockerfile
     dockerContext: .
@@ -14,7 +15,3 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
-      - key: CLIENT_ORIGIN
-        sync: false
-      - key: PORT
-        value: '3001'

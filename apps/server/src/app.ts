@@ -7,11 +7,17 @@ import { env } from './config/env';
 import { openApiDocument } from './docs/openapi';
 import { prisma } from './lib/prisma';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
+import { staticWeb } from './middleware/static-web';
 import { authRouter } from './modules/auth/auth.routes';
 import { gamesRouter } from './modules/games/games.routes';
 import { questionRouter, quizRouter } from './modules/quizzes/quiz.routes';
 
-export function createApp() {
+export interface AppOptions {
+  /** Dossier du front construit à servir sur la même origine que l'API (production). */
+  webDistPath?: string;
+}
+
+export function createApp(options: AppOptions = {}) {
   const app = express();
 
   app.disable('x-powered-by');
@@ -54,6 +60,9 @@ export function createApp() {
   app.use('/api/quizzes', quizRouter);
   app.use('/api/questions', questionRouter);
   app.use('/api/games', gamesRouter);
+
+  const web = options.webDistPath ? staticWeb(options.webDistPath) : null;
+  if (web) app.use(web);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

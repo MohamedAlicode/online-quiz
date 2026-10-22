@@ -21,6 +21,8 @@ const envSchema = z.object({
         .map((origin) => origin.trim())
         .filter(Boolean),
     ),
+  /** Dossier du front construit (apps/web/dist) : si renseigné, le serveur sert aussi le site. */
+  WEB_DIST_PATH: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
