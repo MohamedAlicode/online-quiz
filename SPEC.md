@@ -77,29 +77,30 @@ Index : `Game.code`, `Answer(playerId, questionId)` unique.
 **Client → serveur**
 
 - `host:create-game` { quizId }
+- `host:rejoin` { gameId } (rechargement de la page de l'hôte)
 - `host:start-game`, `host:next`, `host:pause`, `host:resume`, `host:end-game`, `host:kick-player` { playerId }
 - `player:join` { code, nickname }
 - `player:rejoin` { sessionToken }
 - `player:answer` { questionId, choiceId }
 
-**Serveur → client**
+Chaque événement reçoit un accusé de réception typé : `{ ok: true, data }` ou `{ ok: false, error: { code, message } }`.
 
-- `lobby:updated` { players[] }
-- `game:state` { status, ...données de l'état courant }
-- `question:started` { question (sans la bonne réponse), endsAt }
-- `question:results` { correctChoiceId, distribution, playerResult }
-- `leaderboard:updated` { top[], playerRank? }
-- `game:finished` { podium[], fullRanking[] }
-- `error` { code, message }
+**Serveur → client** (implémentation retenue)
 
-Règles : la bonne réponse n'est **jamais** envoyée avant la fin de la question. Chaque événement entrant est validé avec Zod. Rate limiting sur `player:join` et `player:answer`.
+- `game:state` : l'état complet de la partie, adapté au destinataire (`role`, `me`, `view`). `view` est une union discriminée sur `status` (`LOBBY`, `COUNTDOWN`, `QUESTION`, `RESULTS`, `LEADERBOARD`, `PODIUM`, `FINISHED`) qui remplace les événements `lobby:updated`, `question:started`, `question:results`, `leaderboard:updated` et `game:finished` prévus au départ.
+- `player:kicked` { message }
+- `game:closed` { message }
+
+Pourquoi un seul événement d'état : un client qui se reconnecte reçoit simplement l'état courant, sans rejouer d'historique, et le front n'a qu'une source de vérité à afficher. Chaque état contient aussi `serverNow` pour synchroniser les comptes à rebours.
+
+Règles : la bonne réponse n'est **jamais** envoyée avant la fin de la question. Chaque événement entrant est validé avec Zod. Rate limiting sur `player:join`, `player:answer` et les commandes de l'hôte.
 
 ## 7. API REST (Express)
 
 - `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
 - `GET/POST /api/quizzes`, `GET/PUT/DELETE /api/quizzes/:id`, `POST /api/quizzes/:id/duplicate`
 - `POST /api/quizzes/:id/questions`, `PUT/DELETE /api/questions/:id`, `PUT /api/quizzes/:id/questions/reorder`
-- `GET /api/games/:id/results`, `GET /api/games/:id/results.csv`
+- `GET /api/games` (historique), `GET /api/games/:id/results`, `GET /api/games/:id/results.csv`
 - `GET /api/health`
 - Documentation Swagger sur `/api/docs`.
 
