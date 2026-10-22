@@ -1,0 +1,133 @@
+// Schéma de données de Quiz Live.
+// Les parties (Game) conservent un instantané immuable du quiz joué (snapshot) :
+// modifier ou supprimer un quiz ne réécrit donc jamais l'historique des résultats.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum QuestionType {
+  SINGLE
+  TRUE_FALSE
+}
+
+enum GameStatus {
+  LOBBY
+  COUNTDOWN
+  QUESTION
+  RESULTS
+  LEADERBOARD
+  PODIUM
+  FINISHED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  displayName  String
+  createdAt    DateTime @default(now())
+
+  quizzes Quiz[]
+  games   Game[]
+}
+
+model Quiz {
+  id          String   @id @default(uuid())
+  ownerId     String
+  title       String
+  description String   @default("")
+  coverUrl    String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  questions Question[]
+  games     Game[]
+
+  @@index([ownerId])
+}
+
+model Question {
+  id           String       @id @default(uuid())
+  quizId       String
+  type         QuestionType @default(SINGLE)
+  text         String
+  imageUrl     String?
+  timeLimitSec Int          @default(20)
+  basePoints   Int          @default(1000)
+  position     Int
+
+  quiz    Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  choices Choice[]
+
+  @@index([quizId, position])
+}
+
+model Choice {
+  id         String  @id @default(uuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false)
+  position   Int
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId, position])
+}
+
+model Game {
+  id        String     @id @default(uuid())
+  // Le quiz peut être supprimé plus tard : l'historique reste lisible grâce au snapshot.
+  quizId    String?
+  hostId    String
+  // Code à 6 chiffres. Unicité garantie par le service parmi les parties actives.
+  code      String
+  status    GameStatus @default(LOBBY)
+  snapshot  Json
+  startedAt DateTime   @default(now())
+  endedAt   DateTime?
+
+  quiz    Quiz?    @relation(fields: [quizId], references: [id], onDelete: SetNull)
+  host    User     @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  players Player[]
+
+  @@index([code])
+  @@index([hostId, startedAt])
+}
+
+model Player {
+  id           String @id @default(uuid())
+  gameId       String
+  nickname     String
+  sessionToken String @unique
+  finalScore   Int    @default(0)
+  finalRank    Int?
+
+  game    Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  answers Answer[]
+
+  @@unique([gameId, nickname])
+}
+
+model Answer {
+  id            String  @id @default(uuid())
+  playerId      String
+  // Identifiants issus du snapshot de la partie (volontairement sans clé étrangère).
+  questionId    String
+  choiceId      String?
+  isCorrect     Boolean
+  timeTakenMs   Int
+  pointsAwarded Int
+  streakAtTime  Int
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, questionId])
+}
