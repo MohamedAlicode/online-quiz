@@ -1,0 +1,78 @@
+@import '@fontsource-variable/anybody/wdth.css';
+@import '@fontsource/atkinson-hyperlegible/400.css';
+@import '@fontsource/atkinson-hyperlegible/700.css';
+@import 'tailwindcss';
+
+/*
+ * Jetons de design de Quiz Live.
+ * - encre / papier : écrans de gestion (hôte)
+ * - scène : écrans de jeu, pensés pour être projetés et lus depuis le fond d'une salle
+ * - tomate, lagon, moutarde, prairie : les quatre réponses (toujours accompagnées d'une lettre)
+ */
+@theme {
+  --color-ink: #1b1446;
+  --color-ink-soft: #5b5680;
+  --color-paper: #f6f5ff;
+  --color-line: #d9d5f2;
+  --color-stage: #3a2bd1;
+  --color-stage-deep: #2a1ea3;
+  --color-tomato: #f2542d;
+  /* Variante foncée pour le texte rouge sur fond clair (contraste AA). */
+  --color-tomato-ink: #b8321a;
+  --color-lagoon: #12a4b4;
+  --color-mustard: #f5b700;
+  --color-meadow: #43a84f;
+
+  --font-sans: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-display: 'Anybody Variable', 'Atkinson Hyperlegible', system-ui, sans-serif;
+
+  --radius-tile: 1.25rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    min-height: 100dvh;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-stage);
+    outline-offset: 3px;
+  }
+
+  .on-stage :focus-visible {
+    outline-color: var(--color-mustard);
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  /* Chiffres expressifs : la largeur variable d'Anybody est pilotée par --wdth. */
+  .numerals {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: 'wdth' var(--wdth, 100);
+    letter-spacing: -0.01em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
