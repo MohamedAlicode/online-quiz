@@ -14,7 +14,7 @@ export interface ServerOptions {
 
 /** Assemble Express, Socket.IO et le gestionnaire de parties sur un même serveur HTTP. */
 export function createServer(options: ServerOptions = {}) {
-  const app = createApp();
+  const app = createApp({ webDistPath: env.WEB_DIST_PATH });
   const httpServer = createHttpServer(app);
 
   const io: IoServer = new Server(httpServer, {
