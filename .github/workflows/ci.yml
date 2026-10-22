@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, types, tests et build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: quiz
+          POSTGRES_PASSWORD: quiz
+          POSTGRES_DB: quiz_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U quiz -d quiz_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://quiz:quiz@localhost:5432/quiz_test?schema=public
+      TEST_DATABASE_URL: postgresql://quiz:quiz@localhost:5432/quiz_test?schema=public
+      JWT_SECRET: secret-de-ci-suffisamment-long-pour-les-tests-0123
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Formatage
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typage
+        run: npm run typecheck
+
+      - name: Tests (unitaires + intégration)
+        run: npm test
+
+      - name: Build
+        run: npm run build
