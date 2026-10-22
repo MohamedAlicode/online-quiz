@@ -200,14 +200,17 @@ La CI GitHub Actions lance le formatage, le lint, le typage, les tests (avec un 
 
 ## Déploiement
 
-1. **Base de données** : crée une base PostgreSQL gratuite sur [Neon](https://neon.tech) ou [Supabase](https://supabase.com) et récupère son URL de connexion.
-2. **Serveur sur [Render](https://render.com)** : « New > Blueprint », sélectionne le dépôt (le fichier `render.yaml` est détecté). Renseigne `DATABASE_URL` et `CLIENT_ORIGIN` (l'URL du front, par exemple `https://quiz-live.vercel.app`). Les migrations sont appliquées automatiquement au démarrage.
-3. **Front sur [Vercel](https://vercel.com)** : importe le dépôt avec `apps/web` comme « Root Directory » et ajoute la variable `VITE_API_URL` avec l'URL du serveur Render (par exemple `https://quiz-live-server.onrender.com`).
-4. Ajoute le lien de la démo en haut de ce README.
+En production, **un seul service** sert l'API, Socket.IO et le front React à la même adresse : pas de CORS à configurer, et le WebSocket passe par la même origine que la page.
 
-L'image Docker du serveur se construit depuis la racine : `docker build -f apps/server/Dockerfile -t quiz-live-server .`
+1. **Base de données** : crée un projet PostgreSQL gratuit sur [Neon](https://neon.tech) et copie l'URL de connexion **directe** (option « Connection pooling » désactivée), qui sert aussi aux migrations.
+2. **Application sur [Render](https://render.com)** : « New > Blueprint », sélectionne ce dépôt (le fichier `render.yaml` est détecté) et colle l'URL Neon dans `DATABASE_URL`. `JWT_SECRET` est généré automatiquement et les migrations sont appliquées à chaque démarrage.
+3. Ajoute le lien de la démo en haut de ce README.
 
-> Sur l'offre gratuite de Render, le serveur se met en veille après une période d'inactivité : la première connexion peut prendre une trentaine de secondes.
+L'image se construit depuis la racine : `docker build -f apps/server/Dockerfile -t quiz-live .`
+
+> Sur l'offre gratuite de Render, le service se met en veille après 15 minutes sans visite : la première ouverture peut prendre une trentaine de secondes.
+
+**Variante front séparé** : le front peut aussi être déployé sur Vercel (`apps/web` comme « Root Directory », variable `VITE_API_URL` pointant vers le serveur). Il faut alors renseigner l'URL du front dans `CLIENT_ORIGIN` côté serveur.
 
 ## Limites et pistes d'amélioration
 

@@ -1,6 +1,6 @@
-# Image de production du serveur (API + Socket.IO).
+# Image de production : API + Socket.IO + front React, servis par le même serveur.
 # À construire depuis la racine du monorepo :
-#   docker build -f apps/server/Dockerfile -t quiz-live-server .
+#   docker build -f apps/server/Dockerfile -t quiz-live .
 
 FROM node:22-alpine AS build
 WORKDIR /app
@@ -10,17 +10,20 @@ COPY package.json package-lock.json tsconfig.base.json ./
 COPY apps/server/package.json apps/server/
 COPY apps/web/package.json apps/web/
 COPY packages/shared/package.json packages/shared/
-RUN npm ci --workspace @quiz/server --workspace @quiz/shared --include-workspace-root --ignore-scripts
+RUN npm ci --ignore-scripts
 
-# 2. Code source, client Prisma et bundle
+# 2. Code source, client Prisma, bundle du serveur et build du front
 COPY packages/shared packages/shared
 COPY apps/server apps/server
+COPY apps/web apps/web
 RUN npx --workspace @quiz/server prisma generate \
-  && npm run build --workspace @quiz/server
+  && npm run build --workspace @quiz/server \
+  && npm run build --workspace @quiz/web
 
 FROM node:22-alpine
 WORKDIR /app
 ENV NODE_ENV=production
+ENV WEB_DIST_PATH=/app/apps/web/dist
 
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
@@ -28,6 +31,7 @@ COPY --from=build /app/apps/server/package.json ./apps/server/package.json
 COPY --from=build /app/apps/server/prisma ./apps/server/prisma
 COPY --from=build /app/apps/server/prisma.config.ts ./apps/server/prisma.config.ts
 COPY --from=build /app/apps/server/dist ./apps/server/dist
+COPY --from=build /app/apps/web/dist ./apps/web/dist
 
 WORKDIR /app/apps/server
 USER node
