@@ -147,7 +147,7 @@ Chaque partie garde un **instantané du quiz** (`Game.snapshot`) : modifier ou s
 Prérequis : Node.js 22 recommandé (20.19 minimum), Docker (pour PostgreSQL).
 
 ```bash
-git clone <url-du-depot> quiz-live
+git clone https://github.com/MohamedAlicode/online-quiz.git quiz-live
 cd quiz-live
 cp .env.example .env            # puis remplace JWT_SECRET par une longue chaîne aléatoire
 docker compose up -d            # PostgreSQL + base de test
