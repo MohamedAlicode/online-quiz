@@ -6,7 +6,7 @@ Projet pensé pour animer un groupe (centre de loisirs, classe, soirée, équipe
 
 ![Démonstration d'une partie : écran projeté à gauche, téléphone d'un joueur à droite](docs/demo.gif)
 
-> **Démo en ligne** : _lien à ajouter après le déploiement (voir [Déploiement](#déploiement))._
+> **Démo en ligne : <https://quiz-live-hk3r.onrender.com>** (hébergement gratuit : la première ouverture peut prendre une trentaine de secondes, le temps que le serveur se réveille).
 
 ## Fonctionnalités
 
@@ -204,7 +204,6 @@ En production, **un seul service** sert l'API, Socket.IO et le front React à la
 
 1. **Base de données** : crée un projet PostgreSQL gratuit sur [Neon](https://neon.tech) et copie l'URL de connexion **directe** (option « Connection pooling » désactivée), qui sert aussi aux migrations.
 2. **Application sur [Render](https://render.com)** : « New > Blueprint », sélectionne ce dépôt (le fichier `render.yaml` est détecté) et colle l'URL Neon dans `DATABASE_URL`. `JWT_SECRET` est généré automatiquement et les migrations sont appliquées à chaque démarrage.
-3. Ajoute le lien de la démo en haut de ce README.
 
 L'image se construit depuis la racine : `docker build -f apps/server/Dockerfile -t quiz-live .`
 
