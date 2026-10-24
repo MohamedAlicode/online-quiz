@@ -36,7 +36,8 @@ Projet pensé pour animer un groupe (centre de loisirs, classe, soirée, équipe
 **Animations**
 
 - Compte à rebours 3, 2, 1 où les chiffres s'étirent grâce à l'axe de largeur variable de la police (timeline GSAP).
-- Arrivée des joueurs dans le lobby, barre de temps qui change de couleur, histogramme qui se remplit, classement qui se réordonne (layout animations de Framer Motion), podium qui monte avec confettis.
+- Arrivée des joueurs dans le lobby, barre de temps qui change de couleur, histogramme qui se remplit, classement qui se réordonne (layout animations de Framer Motion).
+- Podium en fête (canvas-confetti piloté par la timeline GSAP) : chaque marche monte avec un jet de confettis à sa couleur, puis le vainqueur a droit à une explosion dorée avec des étoiles, des canons de confettis sur les côtés et une pluie finale. Confettis aussi sur le téléphone des trois premiers, et en solo pour un sans-faute ou un record.
 - Toutes les animations respectent le réglage système « réduire les animations ».
 
 **Son**

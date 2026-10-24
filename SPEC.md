@@ -136,7 +136,7 @@ Règles : la bonne réponse n'est **jamais** envoyée avant la fin de la questio
 - Boutons de réponse : feedback au tap, shake sur mauvaise réponse, pulse sur bonne réponse.
 - Histogramme des réponses qui se remplit.
 - Classement avec réordonnancement animé (layout animations de Framer Motion).
-- Podium : montée des 3 marches, apparition des noms, confettis.
+- Podium : montée des 3 marches avec un jet de confettis chacune, apparition des noms, puis explosion dorée, canons latéraux et pluie de confettis pour le vainqueur. Confettis sur le téléphone des 3 premiers et en solo (sans-faute ou record).
 - Transitions de pages douces ; respect de `prefers-reduced-motion`.
 - **Son** (Web Audio API, sans fichier) sur l'écran projeté et en solo : bips 3-2-1 et « top », tic-tac des 5 dernières secondes, notes des marches du podium et fanfare, bonne/mauvaise réponse en solo. Bouton pour couper, réglage mémorisé ; rien sur les téléphones des joueurs.
 
