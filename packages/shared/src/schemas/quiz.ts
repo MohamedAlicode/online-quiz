@@ -1,8 +1,20 @@
 import { z } from 'zod';
 import { BASE_POINTS_OPTIONS, LIMITS } from '../constants';
 
+/**
+ * Images fournies par l'application (drapeaux, cartes des quiz prêts à jouer).
+ * Chemin relatif : servies par le front, quelle que soit l'adresse de déploiement.
+ */
+export const BUILTIN_IMAGE_REGEX =
+  /^\/quiz-images\/[a-z0-9_-]+\/[a-z0-9_-]+\.(svg|png|jpe?g|webp)$/;
+
 const optionalUrl = z
-  .union([z.url('URL invalide'), z.literal('')])
+  .union([
+    // http(s) uniquement : pas de javascript:, data: ou file: dans une balise image.
+    z.url({ protocol: /^https?$/, message: 'URL invalide (http ou https)' }),
+    z.string().regex(BUILTIN_IMAGE_REGEX, 'Image invalide'),
+    z.literal(''),
+  ])
   .optional()
   .nullable()
   .transform((value) => (value ? value : null));

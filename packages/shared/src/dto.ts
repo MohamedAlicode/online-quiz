@@ -104,3 +104,14 @@ export interface ApiErrorBody {
     details?: unknown;
   };
 }
+
+/** Quiz prêt à jouer proposé à tous les hôtes (drapeaux, capitales…). */
+export interface QuizTemplateDto {
+  slug: string;
+  title: string;
+  description: string;
+  /** Nombre de questions tirées au hasard à chaque ajout. */
+  questionCount: number;
+  /** Quelques images représentatives, pour l'aperçu dans la bibliothèque. */
+  previewImages: string[];
+}

@@ -81,6 +81,23 @@ describe('quizInputSchema', () => {
   });
 });
 
+describe('images des questions', () => {
+  const withImage = (imageUrl: string) =>
+    questionInputSchema.safeParse({ ...validQuestion, imageUrl });
+
+  it("accepte une URL absolue ou une image fournie par l'application", () => {
+    expect(withImage('https://exemple.fr/photo.jpg').success).toBe(true);
+    expect(withImage('/quiz-images/flags/fr.svg').success).toBe(true);
+    expect(withImage('/quiz-images/maps/jp.svg').success).toBe(true);
+  });
+
+  it('refuse les autres chemins relatifs', () => {
+    expect(withImage('/etc/passwd').success).toBe(false);
+    expect(withImage('/quiz-images/../secret.svg').success).toBe(false);
+    expect(withImage('javascript:alert(1)').success).toBe(false);
+  });
+});
+
 describe('registerSchema', () => {
   it("normalise l'email en minuscules", () => {
     const parsed = registerSchema.parse({
