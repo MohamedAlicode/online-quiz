@@ -17,6 +17,7 @@ Projet pensé pour animer un groupe (centre de loisirs, classe, soirée, équipe
 - Réordonnancement des questions par glisser-déposer (avec une alternative au clavier), duplication de quiz, aperçu avant lancement, quiz d'exemple en un clic.
 - **Quiz prêts à jouer** : drapeaux et capitales d'Europe et du monde, avec un drapeau ou une carte de situation pour chaque question. Les pays sont tirés au hasard à chaque partie (en alternant les continents), les mauvaises réponses viennent de la même région et la dernière question compte double. « Jouer maintenant » lance la partie en un clic, « Ajouter à mes quiz » crée une copie modifiable.
 - Pilotage de la partie : lobby avec code et QR code, exclusion d'un joueur, pause et reprise, question suivante (bouton ou flèche droite du clavier), fin anticipée, mode plein écran.
+- **Enchaînement automatique** : 5 secondes après l'affichage de la bonne réponse, la question suivante démarre seule (un décompte s'affiche sur l'écran projeté et sur les téléphones). L'interrupteur « Enchaînement auto » le désactive pour revenir au rythme manuel, avec classement intermédiaire.
 - Historique des parties, classement final, taux de réussite par question, questions les plus ratées et export CSV.
 
 **Joueur (sans compte)**
@@ -99,13 +100,15 @@ stateDiagram-v2
   RESULTS --> LEADERBOARD: suivant
   LEADERBOARD --> COUNTDOWN: question suivante
   LEADERBOARD --> PODIUM: dernière question
+  RESULTS --> COUNTDOWN: enchaînement auto (5 s)
+  RESULTS --> PODIUM: enchaînement auto, dernière question
   PODIUM --> FINISHED: terminer
   LOBBY --> FINISHED: annulation
   QUESTION --> PODIUM: fin anticipée
   FINISHED --> [*]
 ```
 
-La machine à états (`apps/server/src/game/state-machine.ts`) est une fonction pure. La salle de jeu (`game-room.ts`) applique les effets : timers, scores, diffusion, persistance.
+La machine à états (`apps/server/src/game/state-machine.ts`) est une fonction pure. La salle de jeu (`game-room.ts`) applique les effets : timers, scores, diffusion, persistance. Avec l'enchaînement automatique (activé par défaut), le serveur programme le passage à la question suivante et envoie l'heure prévue (`autoNextAt`) : les clients se contentent d'afficher le décompte.
 
 ### Calcul des points
 
