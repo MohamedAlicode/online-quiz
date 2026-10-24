@@ -7,7 +7,11 @@ import { useGameStore } from '../stores/game-store';
 
 type HostCommand = Exclude<
   keyof ClientToServerEvents,
-  'host:create-game' | 'host:rejoin' | 'host:kick-player' | `player:${string}`
+  | 'host:create-game'
+  | 'host:rejoin'
+  | 'host:kick-player'
+  | 'host:set-auto-advance'
+  | `player:${string}`
 >;
 
 /**
@@ -61,8 +65,14 @@ export function useHostGame(gameId: string) {
     [perform, token],
   );
 
+  const setAutoAdvance = useCallback(
+    (enabled: boolean) =>
+      perform(() => request(getSocket(token), 'host:set-auto-advance', { enabled })),
+    [perform, token],
+  );
+
   const state: GameStatePayload | null = rawState?.gameId === gameId ? rawState : null;
-  return { state, connection, notice, error, pending, run, kick };
+  return { state, connection, notice, error, pending, run, kick, setAutoAdvance };
 }
 
 /** Connexion du joueur : reprend automatiquement la partie grâce au jeton de session. */
