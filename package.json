@@ -34,12 +34,16 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@svg-maps/world": "^2.0.0",
     "concurrently": "^10.0.6",
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "flag-icons": "^7.6.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.9.10",
+    "svg-path-bbox": "^2.1.0",
+    "svgpath": "^2.6.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.0"
   }
