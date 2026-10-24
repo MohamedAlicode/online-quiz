@@ -1,9 +1,9 @@
-import { computeScore, type PracticeQuestionDto, type QuizDto } from '@quiz/shared';
+import { computeScore, timeFactor, type PracticeQuestionDto, type QuizDto } from '@quiz/shared';
 
 /**
  * Logique du mode entraînement en solo, sous forme de réducteur pur (testé sans navigateur).
  * - « learn » : sans chrono ni points, pour apprendre à son rythme ;
- * - « challenge » : chrono et points calculés avec la même formule que les parties en direct.
+ * - « challenge » : chrono et points selon le temps mis (`timeFactor`), avec le bonus de série des parties.
  */
 export type PracticeMode = 'learn' | 'challenge';
 export type PracticeQuestion = PracticeQuestionDto;
@@ -54,10 +54,10 @@ function grade(
   const limitMs = question.timeLimitSec * 1000;
   const timeTakenMs = Math.min(Math.max(now - state.startedAt, 0), limitMs);
   const isCorrect = question.choices.some((choice) => choice.id === choiceId && choice.isCorrect);
+  // Seul face aux questions : la rapidité se mesure au temps mis, pas à l'ordre d'arrivée.
   const result = computeScore({
     basePoints: state.mode === 'challenge' ? question.basePoints : 0,
-    timeLimitMs: limitMs,
-    timeTakenMs,
+    speedFactor: timeFactor(timeTakenMs, limitMs),
     isCorrect,
     previousStreak: state.streak,
   });
