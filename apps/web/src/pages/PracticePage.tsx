@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router';
 import { Alert, Button, Logo, Spinner } from '../components/ui';
 import { AnswerTile, type TileState } from '../game/AnswerTile';
 import { AutoNextHint } from '../game/AutoNextHint';
+import { Celebration } from '../game/Celebration';
 import { Countdown } from '../game/Countdown';
 import { QuestionImage } from '../game/QuestionImage';
 import { SoundToggle } from '../game/SoundToggle';
@@ -412,7 +413,8 @@ function Summary({
   const total = state.questions.length;
   const missed = missedQuestions(state);
   const [record, setRecord] = useState(false);
-  useSoundCue('fanfare', 'summary', correctCount === total || record);
+  const celebrate = correctCount === total || record;
+  useSoundCue('fanfare', 'summary', celebrate);
 
   // Meilleur score enregistré dans ce navigateur (mêmes questions : quiz complet seulement).
   useEffect(() => {
@@ -433,6 +435,7 @@ function Summary({
 
   return (
     <div className="flex flex-col gap-8 py-6">
+      <Celebration level={celebrate ? 'gold' : null} />
       <section className="flex flex-col items-start gap-2">
         <p className="text-xl font-bold text-white/85">Bilan</p>
         <p

@@ -7,6 +7,7 @@ import { answerStyle, playerColor } from '../lib/answers';
 import { clearPlayerSession } from '../lib/player-session';
 import { AnswerTile } from '../game/AnswerTile';
 import { AutoNextHint } from '../game/AutoNextHint';
+import { Celebration } from '../game/Celebration';
 import { Countdown } from '../game/Countdown';
 import { QuestionImage } from '../game/QuestionImage';
 import { StageShell } from '../game/StageShell';
@@ -204,8 +205,15 @@ function PlayerView({
     case 'FINISHED':
       return (
         <Centered>
+          {view.status === 'PODIUM' && me && me.rank <= 3 ? (
+            <Celebration level={me.rank === 1 ? 'gold' : 'cheer'} />
+          ) : null}
           <p className="font-display text-4xl font-extrabold">
-            {me && me.rank <= 3 ? `Tu montes sur le podium` : 'Partie terminée'}
+            {me?.rank === 1
+              ? 'Tu as gagné !'
+              : me && me.rank <= 3
+                ? 'Tu montes sur le podium'
+                : 'Partie terminée'}
           </p>
           <p
             className="numerals text-[7rem] leading-none font-black"
