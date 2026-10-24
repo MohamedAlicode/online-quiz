@@ -1,5 +1,6 @@
 import type { QuizTemplateDto } from '@quiz/shared';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
 import { api, errorMessage } from '../lib/api';
 import { Alert, Button, Spinner } from './ui';
 
@@ -77,6 +78,12 @@ export function TemplateLibrary({ onPlay, onAdd, busyKey }: TemplateLibraryProps
                   >
                     Ajouter à mes quiz
                   </Button>
+                  <Link
+                    to={`/practice/${template.slug}`}
+                    className="inline-flex min-h-11 items-center rounded-xl px-4 font-bold hover:bg-line/60"
+                  >
+                    S’entraîner
+                  </Link>
                 </div>
               </div>
             </li>

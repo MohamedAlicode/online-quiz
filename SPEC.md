@@ -58,6 +58,13 @@ Cas d'usage naturel : animer un groupe (centre de loisirs, classe, soirée, équ
 - Les pays sont tirés au hasard à chaque ajout (alternance des continents pour les quiz « du monde »), les mauvaises réponses viennent de la même région, la dernière question compte double.
 - `GET /api/templates` liste les modèles ; `POST /api/templates/:slug/import` crée une copie modifiable dans le compte de l'hôte.
 
+### 3.4 ter Entraînement en solo
+
+- Page publique `/practice` : choix d'un quiz prêt à jouer (série tirée au hasard à chaque fois) ou, pour un hôte connecté, d'un de ses quiz (`/practice/quiz/:id`).
+- Deux modes : **Apprendre** (sans chrono ni points, correction et phrase d'explication après chaque réponse) et **Défi chrono** (temps limité, points calculés avec `computeScore`).
+- Passage automatique 5 s après la correction, réponses au clavier, bilan détaillé, révision des seules questions ratées, record local.
+- `GET /api/practice/templates` et `GET /api/practice/templates/:slug` (public, limité en débit) : questions avec bonnes réponses et explication. Exception assumée à la règle « le serveur corrige » : rien n'est classé ni enregistré, la correction se fait côté client dans un réducteur pur testé.
+
 ### 3.5 Historique
 
 - Après la partie, l'hôte consulte les résultats : classement final, taux de réussite par question, questions les plus ratées.
@@ -110,12 +117,13 @@ Règles : la bonne réponse n'est **jamais** envoyée avant la fin de la questio
 - `GET/POST /api/quizzes`, `GET/PUT/DELETE /api/quizzes/:id`, `POST /api/quizzes/:id/duplicate`
 - `POST /api/quizzes/:id/questions`, `PUT/DELETE /api/questions/:id`, `PUT /api/quizzes/:id/questions/reorder`
 - `GET /api/games` (historique), `GET /api/games/:id/results`, `GET /api/games/:id/results.csv`
+- `GET /api/templates`, `POST /api/templates/:slug/import`, `GET /api/practice/templates`, `GET /api/practice/templates/:slug`
 - `GET /api/health`
 - Documentation Swagger sur `/api/docs`.
 
 ## 8. Écrans (front)
 
-- **Public** : accueil (saisie du code + pseudo), connexion/inscription.
+- **Public** : accueil (saisie du code + pseudo), connexion/inscription, entraînement en solo (choix du quiz, mode, questions, bilan).
 - **Hôte** : tableau de bord des quiz, éditeur de quiz, écran de lobby, écran de jeu (grand écran), podium, page de résultats.
 - **Joueur** : attente, écran de réponse (4 gros boutons colorés), feedback bonne/mauvaise réponse, rang et score, écran final.
 

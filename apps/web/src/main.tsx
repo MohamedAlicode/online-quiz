@@ -41,8 +41,28 @@ const routes: RouteObject[] = [
     },
   },
   {
+    path: '/practice',
+    lazy: async () => ({
+      Component: (await import('./pages/PracticeHomePage')).PracticeHomePage,
+    }),
+  },
+  {
+    path: '/practice/:slug',
+    lazy: async () => {
+      const { PracticePage } = await import('./pages/PracticePage');
+      return { element: <PracticePage from="template" /> };
+    },
+  },
+  {
     element: <RequireAuth />,
     children: [
+      {
+        path: '/practice/quiz/:quizId',
+        lazy: async () => {
+          const { PracticePage } = await import('./pages/PracticePage');
+          return { element: <PracticePage from="quiz" /> };
+        },
+      },
       {
         path: '/host/game/:gameId',
         lazy: async () => ({ Component: (await import('./pages/HostGamePage')).HostGamePage }),

@@ -166,6 +166,14 @@ export function DashboardPage() {
                 >
                   Modifier
                 </Link>
+                {quiz.questionCount > 0 ? (
+                  <Link
+                    to={`/practice/quiz/${quiz.id}`}
+                    className="rounded-xl px-4 py-2.5 font-bold hover:bg-line/60"
+                  >
+                    S’entraîner
+                  </Link>
+                ) : null}
                 <Button
                   variant="quiet"
                   onClick={() => void duplicate(quiz)}

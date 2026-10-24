@@ -51,6 +51,7 @@ export const openApiDocument = {
     { name: 'Questions' },
     { name: 'Parties' },
     { name: 'Quiz prêts à jouer' },
+    { name: 'Entraînement solo' },
   ],
   components: {
     securitySchemes: {
@@ -200,6 +201,28 @@ export const openApiDocument = {
           previewImages: {
             type: 'array',
             items: { type: 'string', example: '/quiz-images/flags/fr.svg' },
+          },
+        },
+      },
+      PracticeQuiz: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          description: { type: 'string' },
+          questions: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                text: { type: 'string' },
+                imageUrl: { type: ['string', 'null'] },
+                timeLimitSec: { type: 'integer' },
+                basePoints: { type: 'integer' },
+                choices: { type: 'array', items: { $ref: '#/components/schemas/Choice' } },
+                explanation: { type: ['string', 'null'] },
+              },
+            },
           },
         },
       },
@@ -413,6 +436,24 @@ export const openApiDocument = {
         responses: {
           201: { description: 'Quiz créé', ...wrapped('quiz', 'Quiz') },
           404: errorResponse('Modèle introuvable'),
+        },
+      },
+    },
+    '/api/practice/templates': {
+      get: {
+        tags: ['Entraînement solo'],
+        summary: 'Quiz disponibles pour s’entraîner seul (sans compte)',
+        responses: { 200: { description: 'Liste', ...wrapped('templates', 'QuizTemplate', true) } },
+      },
+    },
+    '/api/practice/templates/{slug}': {
+      parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
+      get: {
+        tags: ['Entraînement solo'],
+        summary: 'Tirer une série de questions avec réponses et explications (sans compte)',
+        responses: {
+          200: { description: 'Série de questions', ...wrapped('practice', 'PracticeQuiz') },
+          404: errorResponse('Quiz introuvable'),
         },
       },
     },

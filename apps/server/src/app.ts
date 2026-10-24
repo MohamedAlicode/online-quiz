@@ -12,6 +12,7 @@ import { staticWeb } from './middleware/static-web';
 import { authRouter } from './modules/auth/auth.routes';
 import { gamesRouter } from './modules/games/games.routes';
 import { questionRouter, quizRouter } from './modules/quizzes/quiz.routes';
+import { practiceRouter } from './modules/practice/practice.routes';
 import { templatesRouter } from './modules/templates/templates.routes';
 
 export interface AppOptions {
@@ -65,6 +66,7 @@ export function createApp(options: AppOptions = {}) {
   app.use('/api/questions', questionRouter);
   app.use('/api/games', gamesRouter);
   app.use('/api/templates', templatesRouter);
+  app.use('/api/practice', practiceRouter);
 
   const web = options.webDistPath ? staticWeb(options.webDistPath) : null;
   if (web) app.use(web);

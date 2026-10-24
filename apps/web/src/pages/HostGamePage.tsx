@@ -190,7 +190,9 @@ export function HostGamePage() {
           {view.status === 'RESULTS' && view.autoNextAt ? (
             <AutoNextHint
               at={view.autoNextAt}
-              isLast={view.questionIndex === view.totalQuestions - 1}
+              label={
+                view.questionIndex === view.totalQuestions - 1 ? 'Podium' : 'Question suivante'
+              }
             />
           ) : null}
           <Button variant="light" size="lg" busy={pending} onClick={() => void run(action.command)}>
