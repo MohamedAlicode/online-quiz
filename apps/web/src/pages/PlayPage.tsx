@@ -6,6 +6,7 @@ import { Spinner } from '../components/ui';
 import { answerStyle, playerColor } from '../lib/answers';
 import { clearPlayerSession } from '../lib/player-session';
 import { AnswerTile } from '../game/AnswerTile';
+import { AutoNextHint } from '../game/AutoNextHint';
 import { Countdown } from '../game/Countdown';
 import { QuestionImage } from '../game/QuestionImage';
 import { StageShell } from '../game/StageShell';
@@ -115,6 +116,12 @@ function PlayerView({
       const result = view.myResult;
       const correctIndex = view.question.choices.findIndex((c) => c.id === view.correctChoiceId);
       const correct = view.question.choices[correctIndex];
+      const autoNext = view.autoNextAt ? (
+        <AutoNextHint
+          at={view.autoNextAt}
+          isLast={view.questionIndex === view.totalQuestions - 1}
+        />
+      ) : null;
       if (!result?.answered) {
         return (
           <Centered>
@@ -122,6 +129,7 @@ function PlayerView({
             <p className="text-lg">
               La bonne réponse était {answerStyle(correctIndex).letter} : {correct?.text}
             </p>
+            {autoNext}
           </Centered>
         );
       }
@@ -157,6 +165,7 @@ function PlayerView({
             ) : null}
           </motion.div>
           {me ? <p className="text-lg font-bold">Tu es {ordinal(me.rank)} pour l’instant</p> : null}
+          {autoNext}
         </Centered>
       );
     }

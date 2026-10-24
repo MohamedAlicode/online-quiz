@@ -1,10 +1,11 @@
-import type { GameStatePayload, GameView } from '@quiz/shared';
+import type { GameSettings, GameStatePayload, GameView } from '@quiz/shared';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, type ReactNode } from 'react';
 import QRCode from 'react-qr-code';
 import { Link, useParams } from 'react-router';
 import { Alert, Button, Logo, Spinner } from '../components/ui';
 import { AnswerTile } from '../game/AnswerTile';
+import { AutoNextHint } from '../game/AutoNextHint';
 import { Countdown } from '../game/Countdown';
 import { Histogram } from '../game/Histogram';
 import { Leaderboard } from '../game/Leaderboard';
@@ -18,7 +19,10 @@ import { useHostGame } from '../game/useGameSession';
 type Command = 'host:start-game' | 'host:next';
 
 /** Libellé et commande du bouton principal selon la phase. */
-function primaryAction(view: GameView): { label: string; command: Command } | null {
+function primaryAction(
+  view: GameView,
+  settings: GameSettings,
+): { label: string; command: Command } | null {
   switch (view.status) {
     case 'LOBBY':
       return view.players.length > 0
@@ -27,6 +31,11 @@ function primaryAction(view: GameView): { label: string; command: Command } | nu
     case 'QUESTION':
       return { label: 'Passer la question', command: 'host:next' };
     case 'RESULTS':
+      if (settings.autoAdvance) {
+        // Enchaînement automatique : le bouton permet de ne pas attendre la fin du décompte.
+        const isLast = view.questionIndex === view.totalQuestions - 1;
+        return { label: isLast ? 'Voir le podium' : 'Question suivante', command: 'host:next' };
+      }
       return { label: 'Voir le classement', command: 'host:next' };
     case 'LEADERBOARD':
       return {
@@ -42,8 +51,9 @@ function primaryAction(view: GameView): { label: string; command: Command } | nu
 
 export function HostGamePage() {
   const { gameId = '' } = useParams();
-  const { state, connection, notice, error, pending, run, kick } = useHostGame(gameId);
-  const action = state ? primaryAction(state.view) : null;
+  const { state, connection, notice, error, pending, run, kick, setAutoAdvance } =
+    useHostGame(gameId);
+  const action = state ? primaryAction(state.view, state.settings) : null;
 
   // Raccourci clavier pour l'hôte qui projette : flèche droite = bouton principal.
   useEffect(() => {
@@ -108,6 +118,30 @@ export function HostGamePage() {
               {view.paused ? 'Reprendre' : 'Pause'}
             </Button>
           ) : null}
+          {view.status !== 'PODIUM' && view.status !== 'FINISHED' ? (
+            <button
+              type="button"
+              aria-pressed={state.settings.autoAdvance}
+              title="Après la bonne réponse, passer seul à la question suivante au bout de 5 secondes"
+              disabled={pending}
+              onClick={() => void setAutoAdvance(!state.settings.autoAdvance)}
+              className="flex items-center gap-2 rounded-xl px-4 py-2 font-bold text-white hover:bg-white/10"
+            >
+              <span
+                aria-hidden="true"
+                className={`relative h-5 w-9 rounded-full transition-colors ${
+                  state.settings.autoAdvance ? 'bg-mustard' : 'bg-white/25'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0 size-4 rounded-full bg-white transition-transform ${
+                    state.settings.autoAdvance ? 'translate-x-4.5' : 'translate-x-0.5'
+                  }`}
+                />
+              </span>
+              Enchaînement auto
+            </button>
+          ) : null}
           {view.status !== 'FINISHED' ? (
             <button
               type="button"
@@ -152,7 +186,13 @@ export function HostGamePage() {
       </AnimatePresence>
 
       {action ? (
-        <footer className="flex justify-end px-4 pb-6 sm:px-8">
+        <footer className="flex flex-wrap items-center justify-end gap-4 px-4 pb-6 sm:px-8">
+          {view.status === 'RESULTS' && view.autoNextAt ? (
+            <AutoNextHint
+              at={view.autoNextAt}
+              isLast={view.questionIndex === view.totalQuestions - 1}
+            />
+          ) : null}
           <Button variant="light" size="lg" busy={pending} onClick={() => void run(action.command)}>
             {action.label}
           </Button>

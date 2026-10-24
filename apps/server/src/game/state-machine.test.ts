@@ -25,6 +25,12 @@ describe('machine à états de la partie', () => {
     expect(status).toBe('FINISHED');
   });
 
+  it('enchaîne automatiquement des résultats à la question suivante ou au podium', () => {
+    expect(transition('RESULTS', { type: 'AUTO_NEXT', hasMoreQuestions: true })).toBe('COUNTDOWN');
+    expect(transition('RESULTS', { type: 'AUTO_NEXT', hasMoreQuestions: false })).toBe('PODIUM');
+    expect(() => transition('QUESTION', { type: 'AUTO_NEXT', hasMoreQuestions: true })).toThrow();
+  });
+
   it('annule la partie si elle est terminée depuis le lobby', () => {
     expect(transition('LOBBY', { type: 'END' })).toBe('FINISHED');
   });

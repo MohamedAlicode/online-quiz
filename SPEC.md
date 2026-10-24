@@ -39,6 +39,7 @@ Cas d'usage naturel : animer un groupe (centre de loisirs, classe, soirée, équ
   3. Timer visible et synchronisé (calculé côté serveur).
   4. Fin de question (temps écoulé ou tous ont répondu) : révélation de la bonne réponse, répartition des réponses en histogramme animé.
   5. Classement intermédiaire (top 5) avec animation de changement de rang.
+- **Enchaînement automatique** (activé par défaut) : 5 s après la révélation de la bonne réponse, le serveur lance la question suivante (ou le podium) sans passer par le classement intermédiaire. Un décompte est affiché chez l'hôte et chez les joueurs ; l'hôte peut le désactiver (`host:set-auto-advance`) ou passer tout de suite.
 - Fin de partie : **podium animé** (top 3), classement complet, stats personnelles pour chaque joueur.
 - Reconnexion : un joueur qui perd sa connexion peut revenir dans la partie avec le même pseudo (token de session stocké localement).
 - L'hôte peut : passer à la question suivante, mettre en pause, terminer la partie.
@@ -65,6 +66,7 @@ Cas d'usage naturel : animer un groupe (centre de loisirs, classe, soirée, équ
 ## 4. Machine à états d'une partie
 
 `LOBBY → COUNTDOWN → QUESTION → RESULTS → LEADERBOARD → (QUESTION | PODIUM) → FINISHED`
+Avec l'enchaînement automatique : `RESULTS → (COUNTDOWN | PODIUM)` au bout de 5 s.
 Chaque transition est déclenchée par le serveur (timer ou action de l'hôte) et diffusée à la salle. La machine à états est un module isolé, testé avec des timers simulés.
 
 ## 5. Modèle de données (Prisma, indicatif)
@@ -85,7 +87,7 @@ Index : `Game.code`, `Answer(playerId, questionId)` unique.
 
 - `host:create-game` { quizId }
 - `host:rejoin` { gameId } (rechargement de la page de l'hôte)
-- `host:start-game`, `host:next`, `host:pause`, `host:resume`, `host:end-game`, `host:kick-player` { playerId }
+- `host:start-game`, `host:next`, `host:pause`, `host:resume`, `host:end-game`, `host:kick-player` { playerId }, `host:set-auto-advance` { enabled }
 - `player:join` { code, nickname }
 - `player:rejoin` { sessionToken }
 - `player:answer` { questionId, choiceId }

@@ -76,6 +76,8 @@ export interface GameRoomOptions {
   /** Appelé quand la partie passe à FINISHED (pour libérer la salle). */
   onFinished?: (room: GameRoom) => void;
   logger?: Pick<Console, 'error'>;
+  /** Enchaînement automatique après la bonne réponse (activé par défaut). */
+  autoAdvance?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -141,6 +143,9 @@ export class GameRoom {
   private finalRanking: RankedPlayer[] = [];
   private readonly playedQuestionIds: string[] = [];
   private lastActivity = Date.now();
+  private autoAdvance: boolean;
+  /** Horodatage du passage automatique à la suite, pendant l'affichage des résultats. */
+  private autoNextAt: number | null = null;
 
   private readonly transport: RoomTransport;
   private readonly writer: GameResultWriter;
@@ -156,6 +161,7 @@ export class GameRoom {
     this.writer = options.writer;
     this.onFinished = options.onFinished;
     this.logger = options.logger ?? console;
+    this.autoAdvance = options.autoAdvance ?? true;
   }
 
   /* ----------------------------- Lecture ---------------------------- */
@@ -287,6 +293,11 @@ export class GameRoom {
         this.endQuestion();
         return;
       case 'RESULTS':
+        if (this.autoAdvance) {
+          // L'hôte n'attend pas la fin des 5 secondes : même suite que l'enchaînement automatique.
+          this.autoNext();
+          return;
+        }
         this.apply({ type: 'NEXT', hasMoreQuestions: this.hasMoreQuestions() });
         this.showLeaderboard();
         return;
@@ -330,6 +341,20 @@ export class GameRoom {
     this.phaseEndsAt = Date.now() + this.pausedRemainingMs;
     this.schedule(() => this.endQuestion(), this.pausedRemainingMs);
     this.touch();
+    this.broadcast();
+  }
+
+  /**
+   * Active ou désactive l'enchaînement automatique, à tout moment. Pendant l'affichage d'une
+   * bonne réponse, le désactiver laisse l'hôte expliquer la réponse aussi longtemps qu'il veut.
+   */
+  setAutoAdvance(enabled: boolean): void {
+    this.autoAdvance = enabled;
+    this.touch();
+    if (this.status === 'RESULTS') {
+      if (enabled) this.scheduleAutoNext();
+      else this.cancelAutoNext();
+    }
     this.broadcast();
   }
 
@@ -402,6 +427,7 @@ export class GameRoom {
       role: target.role,
       serverNow: Date.now(),
       me: player ? this.selfView(player) : null,
+      settings: { autoAdvance: this.autoAdvance },
       view: this.view(player),
     };
   }
@@ -489,7 +515,32 @@ export class GameRoom {
     }
 
     this.playedQuestionIds.push(question.id);
+    if (this.autoAdvance) this.scheduleAutoNext();
     this.broadcast();
+  }
+
+  private scheduleAutoNext(): void {
+    this.schedule(() => this.autoNext(), TIMING.autoAdvanceMs);
+    this.autoNextAt = Date.now() + TIMING.autoAdvanceMs;
+  }
+
+  private cancelAutoNext(): void {
+    this.clearTimer();
+    this.autoNextAt = null;
+  }
+
+  /** Après les résultats : question suivante, ou podium si c'était la dernière. */
+  private autoNext(): void {
+    if (this.status !== 'RESULTS') return;
+    this.cancelAutoNext();
+    const hasMoreQuestions = this.hasMoreQuestions();
+    this.apply({ type: 'AUTO_NEXT', hasMoreQuestions });
+    if (hasMoreQuestions) {
+      this.questionIndex += 1;
+      this.beginCountdown();
+    } else {
+      this.showPodium();
+    }
   }
 
   private showLeaderboard(): void {
@@ -614,6 +665,7 @@ export class GameRoom {
           answeredCount,
           playerCount: this.players.size,
           myChoiceId: result?.choiceId ?? null,
+          autoNextAt: this.autoNextAt,
           myResult: result
             ? {
                 answered: result.answered,
@@ -736,6 +788,7 @@ export class GameRoom {
       clearTimeout(this.timer);
       this.timer = null;
     }
+    this.autoNextAt = null;
   }
 
   private touch(): void {

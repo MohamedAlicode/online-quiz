@@ -1,5 +1,6 @@
 import {
   answerSchema,
+  autoAdvanceSchema,
   createGameSchema,
   emptyPayloadSchema,
   hostRejoinSchema,
@@ -202,6 +203,10 @@ export function registerSocketHandlers(
     });
     on('host:end-game', emptyPayloadSchema, hostLimiter, () => {
       requireHostRoom().end();
+      return null;
+    });
+    on('host:set-auto-advance', autoAdvanceSchema, hostLimiter, ({ enabled }) => {
+      requireHostRoom().setAutoAdvance(enabled);
       return null;
     });
     on('host:kick-player', kickPlayerSchema, hostLimiter, ({ playerId }) => {

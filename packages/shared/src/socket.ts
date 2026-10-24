@@ -48,6 +48,10 @@ export const kickPlayerSchema = z.object({
   playerId: z.string().min(1).max(64),
 });
 
+export const autoAdvanceSchema = z.object({
+  enabled: z.boolean(),
+});
+
 export const emptyPayloadSchema = z.object({}).strict();
 
 export type JoinGamePayload = z.infer<typeof joinGameSchema>;
@@ -56,6 +60,7 @@ export type AnswerPayload = z.infer<typeof answerSchema>;
 export type CreateGamePayload = z.infer<typeof createGameSchema>;
 export type HostRejoinPayload = z.infer<typeof hostRejoinSchema>;
 export type KickPlayerPayload = z.infer<typeof kickPlayerSchema>;
+export type AutoAdvancePayload = z.infer<typeof autoAdvanceSchema>;
 export type EmptyPayload = Record<string, never>;
 
 /* ------------------------------------------------------------------ */
@@ -165,6 +170,8 @@ export type GameView =
       playerCount: number;
       myChoiceId: string | null;
       myResult: PlayerQuestionResult | null;
+      /** Enchaînement automatique : horodatage serveur du passage à la suite, sinon null. */
+      autoNextAt: number | null;
     } & QuestionProgress)
   | ({ status: 'LEADERBOARD'; top: RankedPlayer[]; isLastQuestion: boolean } & QuestionProgress)
   | { status: 'PODIUM'; podium: RankedPlayer[]; ranking: RankedPlayer[] }
@@ -181,7 +188,13 @@ export interface GameStatePayload {
   serverNow: number;
   /** Informations du joueur courant (null pour l'hôte). */
   me: PlayerSelf | null;
+  settings: GameSettings;
   view: GameView;
+}
+
+export interface GameSettings {
+  /** Après la bonne réponse, passer seul à la question suivante (au lieu d'attendre l'hôte). */
+  autoAdvance: boolean;
 }
 
 export interface JoinedGame {
@@ -209,6 +222,7 @@ export interface ClientToServerEvents {
   'host:resume': (payload: EmptyPayload, ack: AckCallback<null>) => void;
   'host:end-game': (payload: EmptyPayload, ack: AckCallback<null>) => void;
   'host:kick-player': (payload: KickPlayerPayload, ack: AckCallback<null>) => void;
+  'host:set-auto-advance': (payload: AutoAdvancePayload, ack: AckCallback<null>) => void;
   'player:join': (payload: JoinGamePayload, ack: AckCallback<JoinedGame>) => void;
   'player:rejoin': (payload: RejoinGamePayload, ack: AckCallback<JoinedGame>) => void;
   'player:answer': (payload: AnswerPayload, ack: AckCallback<{ received: true }>) => void;
