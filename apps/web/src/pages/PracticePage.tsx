@@ -244,7 +244,7 @@ function Intro({
     {
       mode: 'challenge',
       title: 'Défi chrono',
-      text: 'Le temps compte, comme en partie : points de rapidité et bonus de série.',
+      text: 'Le temps compte : plus tu réponds vite, plus tu gagnes de points, avec un bonus de série.',
     },
   ];
   return (

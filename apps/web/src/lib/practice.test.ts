@@ -45,7 +45,7 @@ describe('mode entraînement', () => {
     });
   });
 
-  it('note la réponse avec la formule des parties en direct en mode défi', () => {
+  it('note la réponse selon le temps mis en mode défi', () => {
     let state = startAndBegin('challenge');
     // Réponse juste en 2 s sur 10 : 1000 × (1 − 0,2 / 2) = 900 points.
     state = practiceReducer(state, { type: 'answer', choiceId: 'a-ok', now: 5000 });

@@ -129,6 +129,17 @@ export interface PlayerQuestionResult {
   points: number;
   streakBonus: number;
   streak: number;
+  /** Place dans l'ordre d'arrivée des bonnes réponses (1 = le plus rapide), null si ratée. */
+  speedRank: number | null;
+}
+
+/** Une des bonnes réponses les plus rapides, affichée à la fin de la question. */
+export interface FastestAnswer {
+  playerId: string;
+  nickname: string;
+  speedRank: number;
+  timeTakenMs: number;
+  points: number;
 }
 
 export interface PlayerSelf {
@@ -170,6 +181,8 @@ export type GameView =
       playerCount: number;
       myChoiceId: string | null;
       myResult: PlayerQuestionResult | null;
+      /** Les trois bonnes réponses les plus rapides (les points dépendent de l'ordre d'arrivée). */
+      fastest: FastestAnswer[];
       /** Enchaînement automatique : horodatage serveur du passage à la suite, sinon null. */
       autoNextAt: number | null;
     } & QuestionProgress)

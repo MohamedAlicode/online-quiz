@@ -25,3 +25,13 @@ export function plural(count: number, singular: string, pluralForm = `${singular
 export function formatPercent(ratio: number): string {
   return `${Math.round(ratio * 100)} %`;
 }
+
+const secondsFormatter = new Intl.NumberFormat('fr-FR', {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
+/** Durée de réponse lisible : 1234 ms → « 1,2 s ». */
+export function formatSeconds(ms: number): string {
+  return `${secondsFormatter.format(Math.max(0, ms) / 1000)} s`;
+}

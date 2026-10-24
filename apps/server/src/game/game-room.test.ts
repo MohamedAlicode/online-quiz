@@ -176,8 +176,13 @@ describe('GameRoom — déroulé complet', () => {
     if (results.status === 'RESULTS') {
       expect(results.correctChoiceId).toBe('q1-b');
       expect(results.distribution).toEqual({ 'q1-a': 1, 'q1-b': 1 });
-      // 1000 × (1 − (2 / 10) / 2) = 900
-      expect(results.myResult).toMatchObject({ isCorrect: true, points: 900, streak: 1 });
+      // Seule bonne réponse : 1re place, 100 % de la base.
+      expect(results.myResult).toMatchObject({
+        isCorrect: true,
+        points: 1000,
+        streak: 1,
+        speedRank: 1,
+      });
     }
     expect(transport.player(bob.id).me).toMatchObject({ score: 0, rank: 2 });
 
@@ -202,21 +207,30 @@ describe('GameRoom — déroulé complet', () => {
 
     const aliceResult = transport.player(alice.id).view;
     if (aliceResult.status === 'RESULTS') {
-      // 2000 × (1 − (10 / 20) / 2) = 1500, + 100 de série (2e bonne réponse d'affilée)
-      expect(aliceResult.myResult).toMatchObject({ points: 1600, streakBonus: 100, streak: 2 });
+      // 2e à trouver : 2000 × 90 % = 1800, + 100 de série (2e bonne réponse d'affilée)
+      expect(aliceResult.myResult).toMatchObject({
+        points: 1900,
+        streakBonus: 100,
+        streak: 2,
+        speedRank: 2,
+      });
     }
     const bobResult = transport.player(bob.id).view;
     if (bobResult.status === 'RESULTS') {
-      expect(bobResult.myResult).toMatchObject({ points: 2000, streakBonus: 0, streak: 1 });
+      expect(bobResult.myResult).toMatchObject({ points: 2000, streakBonus: 0, speedRank: 1 });
+      expect(bobResult.fastest.map((f) => [f.nickname, f.speedRank, f.points])).toEqual([
+        ['Bob', 1, 2000],
+        ['Alice', 2, 1900],
+      ]);
     }
 
     room.next();
     const finalBoard = transport.host().view;
     if (finalBoard.status === 'LEADERBOARD') {
       expect(finalBoard.isLastQuestion).toBe(true);
-      // Alice : 900 + 1600 = 2500 ; Bob : 2000. Alice garde la 1re place.
+      // Alice : 1000 + 1900 = 2900 ; Bob : 2000. Alice garde la 1re place.
       expect(finalBoard.top.map((p) => [p.nickname, p.score, p.previousRank])).toEqual([
-        ['Alice', 2500, 1],
+        ['Alice', 2900, 1],
         ['Bob', 2000, 2],
       ]);
     }
@@ -233,13 +247,51 @@ describe('GameRoom — déroulé complet', () => {
     expect(saved[0]?.players).toHaveLength(2);
     expect(saved[0]?.answers).toHaveLength(4);
     expect(saved[0]?.players.find((p) => p.nickname === 'Alice')).toMatchObject({
-      finalScore: 2500,
+      finalScore: 2900,
       finalRank: 1,
     });
 
     room.next();
     expect(transport.host().view.status).toBe('FINISHED');
     expect(onFinished).toHaveBeenCalledOnce();
+  });
+
+  it('donne plus de points aux premiers à trouver : 1er 100 %, 2e 90 %, 3e 80 %…', () => {
+    const { room, transport } = setup();
+    const players = ['Alice', 'Bob', 'Chloé', 'Dina', 'Eli'].map((name) => join(room, name));
+    const [alice, bob, chloe, dina, eli] = players.map((player) => player.id);
+    room.start();
+    vi.advanceTimersByTime(3000);
+
+    // Ordre d'arrivée : Chloé, Alice, Dina (mauvaise réponse), Eli, puis Bob.
+    room.submitAnswer(chloe!, 'q1', 'q1-b');
+    vi.advanceTimersByTime(800);
+    room.submitAnswer(alice!, 'q1', 'q1-b');
+    vi.advanceTimersByTime(800);
+    room.submitAnswer(dina!, 'q1', 'q1-a');
+    vi.advanceTimersByTime(3000);
+    room.submitAnswer(eli!, 'q1', 'q1-b');
+    vi.advanceTimersByTime(4000);
+    room.submitAnswer(bob!, 'q1', 'q1-b');
+
+    const resultOf = (id: string) => {
+      const view = transport.player(id).view;
+      return view.status === 'RESULTS' ? view.myResult : null;
+    };
+    // Une mauvaise réponse ne prend pas de place : Eli est 3e, Bob 4e.
+    expect(resultOf(chloe!)).toMatchObject({ speedRank: 1, points: 1000 });
+    expect(resultOf(alice!)).toMatchObject({ speedRank: 2, points: 900 });
+    expect(resultOf(eli!)).toMatchObject({ speedRank: 3, points: 800 });
+    expect(resultOf(bob!)).toMatchObject({ speedRank: 4, points: 700 });
+    expect(resultOf(dina!)).toMatchObject({ speedRank: null, points: 0 });
+
+    // L'écran projeté montre les trois plus rapides, avec leur temps.
+    const host = transport.host().view;
+    expect(host.status === 'RESULTS' && host.fastest).toEqual([
+      { playerId: chloe, nickname: 'Chloé', speedRank: 1, timeTakenMs: 0, points: 1000 },
+      { playerId: alice, nickname: 'Alice', speedRank: 2, timeTakenMs: 800, points: 900 },
+      { playerId: eli, nickname: 'Eli', speedRank: 3, timeTakenMs: 4600, points: 800 },
+    ]);
   });
 
   it('termine la question à la fin du temps et note les absences de réponse', () => {
@@ -311,8 +363,8 @@ describe('GameRoom — actions de l’hôte', () => {
     room.submitAnswer(alice.id, 'q1', 'q1-b');
 
     const view = transport.player(alice.id).view;
-    // Temps compté : 2 s seulement → 900 points.
-    expect(view.status === 'RESULTS' && view.myResult?.points).toBe(900);
+    // Temps compté : 2 s seulement, ce qui garde l'ordre d'arrivée juste après une pause.
+    expect(view.status === 'RESULTS' && view.fastest[0]?.timeTakenMs).toBe(2000);
   });
 
   it('permet de passer une question avant la fin du temps', () => {

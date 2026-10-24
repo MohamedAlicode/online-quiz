@@ -7,6 +7,7 @@ import { Alert, Button, Logo, Spinner } from '../components/ui';
 import { AnswerTile } from '../game/AnswerTile';
 import { AutoNextHint } from '../game/AutoNextHint';
 import { Countdown } from '../game/Countdown';
+import { FastestList } from '../game/FastestList';
 import { Histogram } from '../game/Histogram';
 import { Leaderboard } from '../game/Leaderboard';
 import { LobbyPlayers } from '../game/LobbyPlayers';
@@ -318,11 +319,16 @@ function HostView({
               {view.question.text}
             </h1>
           </div>
-          <Histogram
-            question={view.question}
-            distribution={view.distribution}
-            correctChoiceId={view.correctChoiceId}
-          />
+          <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-end lg:justify-center lg:gap-12">
+            <div className="w-full max-w-2xl">
+              <Histogram
+                question={view.question}
+                distribution={view.distribution}
+                correctChoiceId={view.correctChoiceId}
+              />
+            </div>
+            <FastestList fastest={view.fastest} />
+          </div>
           <div className="mt-auto grid gap-4 md:grid-cols-2">
             {view.question.choices.map((choice, index) => (
               <AnswerTile

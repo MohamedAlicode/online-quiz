@@ -1,10 +1,14 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import {
+  FASTEST_SIZE,
   LEADERBOARD_SIZE,
   LIMITS,
   TIMING,
   computeScore,
+  rankBySpeed,
+  rankFactor,
   rankPlayers,
+  type FastestAnswer,
   type GameStatePayload,
   type GameView,
   type LobbyPlayer,
@@ -484,14 +488,24 @@ export class GameRoom {
     const correctId = correctChoiceId(question);
     const limitMs = question.timeLimitSec * 1000;
 
+    // Les points dépendent de l'ordre d'arrivée des bonnes réponses : 1er 100 %, 2e 90 %…
+    // Le temps de réponse exclut les pauses, le classement est donc juste même après une pause.
+    const speedRanks = rankBySpeed(
+      [...this.players.values()].flatMap((player) =>
+        player.pending?.choiceId === correctId
+          ? [{ id: player.id, timeTakenMs: player.pending.timeTakenMs }]
+          : [],
+      ),
+    );
+
     for (const player of this.players.values()) {
       const answer = player.pending;
       const isCorrect = answer?.choiceId === correctId;
       const timeTakenMs = answer?.timeTakenMs ?? limitMs;
+      const speedRank = speedRanks.get(player.id) ?? null;
       const score = computeScore({
         basePoints: question.basePoints,
-        timeLimitMs: limitMs,
-        timeTakenMs,
+        speedFactor: speedRank ? rankFactor(speedRank) : 0,
         isCorrect,
         previousStreak: player.streak,
       });
@@ -508,6 +522,7 @@ export class GameRoom {
         points: score.points,
         streakBonus: score.streakBonus,
         streak: score.streak,
+        speedRank,
         choiceId: answer?.choiceId ?? null,
         timeTakenMs,
       });
@@ -657,6 +672,23 @@ export class GameRoom {
           }
         }
         const result = player?.results.get(question.id);
+        const fastest: FastestAnswer[] = [...this.players.values()]
+          .flatMap((candidate) => {
+            const scored = candidate.results.get(question.id);
+            return scored?.speedRank
+              ? [
+                  {
+                    playerId: candidate.id,
+                    nickname: candidate.nickname,
+                    speedRank: scored.speedRank,
+                    timeTakenMs: scored.timeTakenMs,
+                    points: scored.points,
+                  },
+                ]
+              : [];
+          })
+          .sort((a, b) => a.timeTakenMs - b.timeTakenMs)
+          .slice(0, FASTEST_SIZE);
         return {
           status: 'RESULTS',
           question: toPublicQuestion(question),
@@ -673,8 +705,10 @@ export class GameRoom {
                 points: result.points,
                 streakBonus: result.streakBonus,
                 streak: result.streak,
+                speedRank: result.speedRank,
               }
             : null,
+          fastest,
           ...progress,
         };
       }
