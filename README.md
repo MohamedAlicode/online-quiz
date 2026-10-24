@@ -23,14 +23,14 @@ Projet pensé pour animer un groupe (centre de loisirs, classe, soirée, équipe
 **Joueur (sans compte)**
 
 - Rejoindre avec un code et un pseudo, ou en scannant le QR code.
-- Grosses tuiles de réponse lettre + couleur, retour immédiat (bonne réponse, ratée, temps écoulé), points gagnés, série en cours, rang.
+- Grosses tuiles de réponse lettre + couleur, retour immédiat (bonne réponse, ratée, temps écoulé), points gagnés, place dans l'ordre d'arrivée, série en cours, rang.
 - Reprise automatique de la partie après un rechargement de page ou une coupure réseau.
 
 **Entraînement en solo (sans compte)**
 
 - Depuis l'accueil, « Entraîne-toi seul » : les quiz drapeaux et capitales, avec une nouvelle série de pays à chaque fois. Un hôte connecté peut aussi s'entraîner sur ses propres quiz.
 - Mode **Apprendre** : pas de chrono, et après chaque réponse la correction avec une phrase à retenir (« Amsterdam est la capitale des Pays-Bas. »).
-- Mode **Défi chrono** : temps limité et points calculés avec la même formule que les parties en direct (rapidité et série).
+- Mode **Défi chrono** : temps limité, et plus on répond vite, plus on gagne de points (sans adversaire, la rapidité se mesure au temps mis), avec le même bonus de série qu'en partie.
 - Passage automatique à la question suivante 5 s après la correction (ou tout de suite avec Entrée), réponses au clavier (touches 1 à 4), bilan question par question, « Revoir mes erreurs » pour rejouer uniquement les questions ratées, record conservé dans le navigateur.
 
 **Animations**
@@ -119,10 +119,12 @@ La machine à états (`apps/server/src/game/state-machine.ts`) est une fonction 
 
 ### Calcul des points
 
-- Bonne réponse : `base × (1 − (temps mis / temps imparti) / 2)`, arrondi. Une réponse instantanée vaut 100 % de la base, une réponse au dernier moment 50 %.
+- Bonne réponse : les points dépendent de l'**ordre d'arrivée** des bonnes réponses. Le premier à trouver gagne 100 % de la base, le deuxième 90 %, le troisième 80 %… et jamais moins de 50 %. Sur une question à 1000 points : 1000, 900, 800, 700, 600, puis 500.
+- À la fin de chaque question, l'écran projeté affiche les trois plus rapides avec leur temps, et chaque téléphone indique la place du joueur (« 2e plus rapide à trouver »).
 - Série : +100 par bonne réponse consécutive à partir de la deuxième, plafonné à +500.
 - Mauvaise réponse ou absence de réponse : 0 point, la série repart de zéro.
-- Le temps de pause est exclu du temps de réponse.
+- Le temps de pause est exclu du temps de réponse : l'ordre d'arrivée reste juste après une pause. Deux réponses dans la même milliseconde partagent la place.
+- En entraînement solo (sans adversaire), la rapidité se mesure au temps mis : `base × (1 − (temps mis / temps imparti) / 2)`.
 - Égalité de score : le joueur le plus rapide (temps cumulé sur ses bonnes réponses) passe devant.
 
 ### Modèle de données

@@ -46,7 +46,8 @@ Cas d'usage naturel : animer un groupe (centre de loisirs, classe, soirée, équ
 
 ### 3.4 Score
 
-- Bonne réponse : `points = base * (1 - (tempsMis / tempsImparti) / 2)`, arrondi. Une réponse instantanée vaut presque 100 % de la base, une réponse au dernier moment 50 %.
+- Bonne réponse : points selon l'**ordre d'arrivée** des bonnes réponses (calculé à la fin de la question à partir des temps de réponse, pauses exclues) : 1er 100 % de la base, puis −10 % par place, 50 % minimum (`rankFactor`). Ex-aequo à la milliseconde : même place.
+- Fin de question : l'hôte voit les trois plus rapides (`fastest`), chaque joueur sa place (`speedRank`).
 - Mauvaise réponse ou absence de réponse : 0.
 - **Série (streak)** : bonus de +100 par bonne réponse consécutive (plafonné à +500).
 - Le calcul est une fonction pure dans `packages/shared` ou un service serveur, 100 % testée.
@@ -61,7 +62,7 @@ Cas d'usage naturel : animer un groupe (centre de loisirs, classe, soirée, équ
 ### 3.4 ter Entraînement en solo
 
 - Page publique `/practice` : choix d'un quiz prêt à jouer (série tirée au hasard à chaque fois) ou, pour un hôte connecté, d'un de ses quiz (`/practice/quiz/:id`).
-- Deux modes : **Apprendre** (sans chrono ni points, correction et phrase d'explication après chaque réponse) et **Défi chrono** (temps limité, points calculés avec `computeScore`).
+- Deux modes : **Apprendre** (sans chrono ni points, correction et phrase d'explication après chaque réponse) et **Défi chrono** (temps limité, `computeScore` avec `timeFactor` : sans adversaire, la rapidité se mesure au temps mis, 100 % à 50 % de la base).
 - Passage automatique 5 s après la correction, réponses au clavier, bilan détaillé, révision des seules questions ratées, record local.
 - `GET /api/practice/templates` et `GET /api/practice/templates/:slug` (public, limité en débit) : questions avec bonnes réponses et explication. Exception assumée à la règle « le serveur corrige » : rien n'est classé ni enregistré, la correction se fait côté client dans un réducteur pur testé.
 
