@@ -134,7 +134,7 @@ export function HostGamePage() {
                 }`}
               >
                 <span
-                  className={`absolute top-0.5 size-4 rounded-full bg-white transition-transform ${
+                  className={`absolute top-0.5 left-0 size-4 rounded-full bg-white transition-transform ${
                     state.settings.autoAdvance ? 'translate-x-4.5' : 'translate-x-0.5'
                   }`}
                 />
