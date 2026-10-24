@@ -26,6 +26,13 @@ Projet pensé pour animer un groupe (centre de loisirs, classe, soirée, équipe
 - Grosses tuiles de réponse lettre + couleur, retour immédiat (bonne réponse, ratée, temps écoulé), points gagnés, série en cours, rang.
 - Reprise automatique de la partie après un rechargement de page ou une coupure réseau.
 
+**Entraînement en solo (sans compte)**
+
+- Depuis l'accueil, « Entraîne-toi seul » : les quiz drapeaux et capitales, avec une nouvelle série de pays à chaque fois. Un hôte connecté peut aussi s'entraîner sur ses propres quiz.
+- Mode **Apprendre** : pas de chrono, et après chaque réponse la correction avec une phrase à retenir (« Amsterdam est la capitale des Pays-Bas. »).
+- Mode **Défi chrono** : temps limité et points calculés avec la même formule que les parties en direct (rapidité et série).
+- Passage automatique à la question suivante 5 s après la correction (ou tout de suite avec Entrée), réponses au clavier (touches 1 à 4), bilan question par question, « Revoir mes erreurs » pour rejouer uniquement les questions ratées, record conservé dans le navigateur.
+
 **Animations**
 
 - Compte à rebours 3, 2, 1 où les chiffres s'étirent grâce à l'axe de largeur variable de la police (timeline GSAP).
@@ -219,6 +226,7 @@ L'image se construit depuis la racine : `docker build -f apps/server/Dockerfile 
 
 - Les parties actives sont en mémoire : une seule instance du serveur. Pour passer à plusieurs instances, il faudrait partager l'état (Redis et l'adaptateur Redis de Socket.IO).
 - Le jeton de l'hôte est stocké dans le `localStorage` ; un cookie `httpOnly` serait plus robuste face au XSS.
+- Le mode entraînement reçoit les bonnes réponses avec les questions et se corrige dans le navigateur : sans classement ni enjeu, la triche n'a pas d'intérêt, et cela évite tout aller-retour réseau. Les parties en direct, elles, restent corrigées par le serveur.
 - Prévu ensuite : questions à choix multiple et à réponse libre, mode équipes, import de quiz en CSV, d'autres quiz prêts à jouer (monuments, langues), sons.
 
 ## Crédits
