@@ -30,6 +30,8 @@ export const SCORING = {
 export const TIMING = {
   /** Durée du compte à rebours 3, 2, 1 avant chaque question. */
   countdownMs: 3000,
+  /** Enchaînement automatique : temps d'affichage de la bonne réponse avant la suite. */
+  autoAdvanceMs: 5000,
 } as const;
 
 /** Nombre de joueurs affichés dans le classement intermédiaire. */

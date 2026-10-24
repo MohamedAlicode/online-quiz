@@ -12,6 +12,8 @@ import type { GameViewStatus } from '@quiz/shared';
  *                                             PODIUM ─NEXT / END─▶ FINISHED
  *
  * END depuis le lobby annule la partie (FINISHED), depuis une phase de jeu elle saute au PODIUM.
+ * En enchaînement automatique, AUTO_NEXT mène de RESULTS directement à la question suivante
+ * (COUNTDOWN) ou au PODIUM après la dernière question, sans classement intermédiaire.
  * La salle (GameRoom) exécute les effets (timers, scores, diffusion) ; ce module ne fait que
  * décider si une transition est permise et vers quel état elle mène.
  */
@@ -22,6 +24,8 @@ export type GameEvent =
   | { type: 'COUNTDOWN_ELAPSED' }
   | { type: 'QUESTION_ENDED' }
   | { type: 'NEXT'; hasMoreQuestions: boolean }
+  /** Enchaînement automatique : on saute le classement intermédiaire. */
+  | { type: 'AUTO_NEXT'; hasMoreQuestions: boolean }
   | { type: 'END' };
 
 export class InvalidTransitionError extends Error {
@@ -49,6 +53,9 @@ export function transition(status: GameStatus, event: GameEvent): GameStatus {
       if (status === 'RESULTS') return 'LEADERBOARD';
       if (status === 'LEADERBOARD') return event.hasMoreQuestions ? 'COUNTDOWN' : 'PODIUM';
       if (status === 'PODIUM') return 'FINISHED';
+      break;
+    case 'AUTO_NEXT':
+      if (status === 'RESULTS') return event.hasMoreQuestions ? 'COUNTDOWN' : 'PODIUM';
       break;
     case 'END':
       if (status === 'LOBBY' || status === 'PODIUM') return 'FINISHED';

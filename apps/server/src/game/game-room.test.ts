@@ -60,7 +60,8 @@ class FakeTransport implements RoomTransport {
   }
 }
 
-function setup() {
+/** Par défaut, les tests pilotent la partie à la main (sans enchaînement automatique). */
+function setup({ autoAdvance = false }: { autoAdvance?: boolean } = {}) {
   const transport = new FakeTransport();
   const saved: FinishedGameData[] = [];
   const writer = {
@@ -79,6 +80,7 @@ function setup() {
     writer,
     onFinished,
     logger: { error: vi.fn() },
+    autoAdvance,
   });
   return { room, transport, writer, saved, onFinished };
 }
@@ -371,5 +373,94 @@ describe('GameRoom — actions de l’hôte', () => {
     join(room, 'Alice');
     expect(() => room.next()).toThrowError(expect.objectContaining({ code: 'INVALID_STATE' }));
     expect(() => room.pause()).toThrowError(expect.objectContaining({ code: 'INVALID_STATE' }));
+  });
+});
+
+describe('GameRoom — enchaînement automatique', () => {
+  it('passe seul à la question suivante 5 s après la bonne réponse', () => {
+    const { room, transport } = setup({ autoAdvance: true });
+    const alice = join(room, 'Alice');
+    room.start();
+    vi.advanceTimersByTime(3000);
+    room.submitAnswer(alice.id, 'q1', 'q1-b');
+
+    const results = transport.player(alice.id);
+    expect(results.view.status).toBe('RESULTS');
+    expect(results.settings.autoAdvance).toBe(true);
+    expect(results.view.status === 'RESULTS' && results.view.autoNextAt).toBe(Date.now() + 5000);
+
+    vi.advanceTimersByTime(4999);
+    expect(transport.host().view.status).toBe('RESULTS');
+    vi.advanceTimersByTime(1);
+    // Pas de classement intermédiaire : on enchaîne sur le compte à rebours de la question 2.
+    const next = transport.host().view;
+    expect(next.status).toBe('COUNTDOWN');
+    expect(next.status === 'COUNTDOWN' && next.questionIndex).toBe(1);
+  });
+
+  it('va au podium après la dernière question et enregistre les résultats', async () => {
+    const { room, transport, saved } = setup({ autoAdvance: true });
+    const alice = join(room, 'Alice');
+    room.start();
+    vi.advanceTimersByTime(3000);
+    room.submitAnswer(alice.id, 'q1', 'q1-b');
+    vi.advanceTimersByTime(5000 + 3000);
+    room.submitAnswer(alice.id, 'q2', 'q2-a');
+    vi.advanceTimersByTime(5000);
+
+    expect(transport.player(alice.id).view.status).toBe('PODIUM');
+    await vi.waitFor(() => expect(saved).toHaveLength(1));
+  });
+
+  it("laisse l'hôte passer tout de suite à la suite sans attendre les 5 s", () => {
+    const { room, transport } = setup({ autoAdvance: true });
+    const alice = join(room, 'Alice');
+    room.start();
+    vi.advanceTimersByTime(3000);
+    room.submitAnswer(alice.id, 'q1', 'q1-b');
+    room.next();
+    expect(transport.host().view.status).toBe('COUNTDOWN');
+  });
+
+  it("peut être désactivé pendant les résultats pour garder la réponse à l'écran", () => {
+    const { room, transport } = setup({ autoAdvance: true });
+    const alice = join(room, 'Alice');
+    room.start();
+    vi.advanceTimersByTime(3000);
+    room.submitAnswer(alice.id, 'q1', 'q1-b');
+
+    room.setAutoAdvance(false);
+    const view = transport.host().view;
+    expect(view.status === 'RESULTS' && view.autoNextAt).toBeNull();
+    vi.advanceTimersByTime(60_000);
+    expect(transport.host().view.status).toBe('RESULTS');
+
+    // Mode manuel : le bouton « Suivant » repasse par le classement.
+    room.next();
+    expect(transport.host().view.status).toBe('LEADERBOARD');
+  });
+
+  it('reprend le décompte quand on le réactive', () => {
+    const { room, transport } = setup({ autoAdvance: false });
+    const alice = join(room, 'Alice');
+    room.start();
+    vi.advanceTimersByTime(3000);
+    room.submitAnswer(alice.id, 'q1', 'q1-b');
+    expect(transport.host().settings.autoAdvance).toBe(false);
+
+    room.setAutoAdvance(true);
+    vi.advanceTimersByTime(5000);
+    expect(transport.host().view.status).toBe('COUNTDOWN');
+  });
+
+  it("n'avance pas tout seul si la partie est terminée pendant les résultats", () => {
+    const { room, transport } = setup({ autoAdvance: true });
+    const alice = join(room, 'Alice');
+    room.start();
+    vi.advanceTimersByTime(3000);
+    room.submitAnswer(alice.id, 'q1', 'q1-b');
+    room.end();
+    vi.advanceTimersByTime(10_000);
+    expect(transport.host().view.status).toBe('PODIUM');
   });
 });

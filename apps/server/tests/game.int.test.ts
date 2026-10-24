@@ -110,6 +110,14 @@ describe('partie en temps réel (Socket.IO)', () => {
     expect(created.data.code).toMatch(/^\d{6}$/);
     expect((await host.waitFor('LOBBY')).role).toBe('host');
 
+    // Ce scénario teste le pilotage manuel (classement entre les questions) :
+    // on désactive l'enchaînement automatique, activé par défaut.
+    expect(host.last?.settings.autoAdvance).toBe(true);
+    expect((await host.socket.emitWithAck('host:set-auto-advance', { enabled: false })).ok).toBe(
+      true,
+    );
+    await expect.poll(() => host.last?.settings.autoAdvance).toBe(false);
+
     // Erreurs de saisie côté joueur.
     const stranger = await client();
     const badCode = await stranger.socket.emitWithAck('player:join', {
