@@ -50,6 +50,13 @@ Cas d'usage naturel : animer un groupe (centre de loisirs, classe, soirée, équ
 - **Série (streak)** : bonus de +100 par bonne réponse consécutive (plafonné à +500).
 - Le calcul est une fonction pure dans `packages/shared` ou un service serveur, 100 % testée.
 
+### 3.4 bis Quiz prêts à jouer
+
+- Bibliothèque proposée à tous les hôtes : drapeaux d'Europe, drapeaux du monde, capitales d'Europe, capitales du monde.
+- Chaque question a une image servie par l'application : drapeau (`/quiz-images/flags/<code>.svg`) ou carte de situation du pays (`/quiz-images/maps/<code>.svg`).
+- Les pays sont tirés au hasard à chaque ajout (alternance des continents pour les quiz « du monde »), les mauvaises réponses viennent de la même région, la dernière question compte double.
+- `GET /api/templates` liste les modèles ; `POST /api/templates/:slug/import` crée une copie modifiable dans le compte de l'hôte.
+
 ### 3.5 Historique
 
 - Après la partie, l'hôte consulte les résultats : classement final, taux de réussite par question, questions les plus ratées.
@@ -143,4 +150,4 @@ Règles : la bonne réponse n'est **jamais** envoyée avant la fin de la questio
 
 ## 12. Hors périmètre (pour plus tard)
 
-Questions à choix multiple et réponse libre, mode équipes, import de quiz (CSV), bibliothèque de quiz publics, sons et musique, thèmes personnalisables, internationalisation.
+Questions à choix multiple et réponse libre, mode équipes, import de quiz (CSV), bibliothèque de quiz publics créés par les hôtes, sons et musique, thèmes personnalisables, internationalisation.
