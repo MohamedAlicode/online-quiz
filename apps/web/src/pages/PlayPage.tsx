@@ -119,7 +119,7 @@ function PlayerView({
       const autoNext = view.autoNextAt ? (
         <AutoNextHint
           at={view.autoNextAt}
-          isLast={view.questionIndex === view.totalQuestions - 1}
+          label={view.questionIndex === view.totalQuestions - 1 ? 'Podium' : 'Question suivante'}
         />
       ) : null;
       if (!result?.answered) {

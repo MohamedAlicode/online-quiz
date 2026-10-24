@@ -105,6 +105,14 @@ export function HomePage() {
             Rejoindre la partie
           </Button>
         </motion.form>
+
+        <p className="mt-10 max-w-xl text-lg text-white/85">
+          Pas de code ?{' '}
+          <Link to="/practice" className="font-bold text-white underline underline-offset-4">
+            Entraîne-toi seul
+          </Link>{' '}
+          sur les drapeaux et les capitales du monde.
+        </p>
       </main>
 
       <footer className="mx-auto w-full max-w-5xl px-4 pb-6 text-white/80">

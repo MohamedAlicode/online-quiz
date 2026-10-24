@@ -21,7 +21,8 @@ const STATE_CLASSES: Record<TileState, string> = {
   // Les réponses écartées passent en neutre (une couleur translucide sur l'indigo serait boueuse).
   dimmed: '',
   correct: 'ring-4 ring-white ring-offset-4 ring-offset-stage',
-  wrong: '',
+  // Mauvaise réponse choisie (mode entraînement) : neutre, entourée de rouge et marquée d'une croix.
+  wrong: 'ring-4 ring-tomato ring-offset-4 ring-offset-stage',
 };
 
 const isMuted = (state: TileState) => state === 'dimmed' || state === 'wrong';
@@ -53,6 +54,14 @@ export function AnswerTile({
       {state === 'correct' ? (
         <span aria-label="Bonne réponse" className="ml-auto text-3xl font-black">
           ✓
+        </span>
+      ) : null}
+      {state === 'wrong' ? (
+        <span
+          aria-label="Ta réponse, incorrecte"
+          className="ml-auto text-3xl font-black text-white"
+        >
+          ✗
         </span>
       ) : null}
     </>
