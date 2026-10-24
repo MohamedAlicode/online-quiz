@@ -6,6 +6,7 @@ import { RouterProvider } from 'react-router/dom';
 import { RequireAuth } from './components/RequireAuth';
 import { Spinner } from './components/ui';
 import './index.css';
+import { installAudioUnlock } from './lib/sound';
 import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PlayPage } from './pages/PlayPage';
@@ -102,6 +103,9 @@ const routes: RouteObject[] = [
   },
   { path: '*', element: <NotFoundPage /> },
 ];
+
+// Les navigateurs n'autorisent le son qu'après une interaction : on le débloque au premier clic.
+installAudioUnlock();
 
 // La route racine affiche un indicateur pendant le chargement d'un écran chargé à la demande.
 const router = createBrowserRouter([{ HydrateFallback: RouteLoading, children: routes }]);
