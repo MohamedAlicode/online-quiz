@@ -39,6 +39,12 @@ Projet pensé pour animer un groupe (centre de loisirs, classe, soirée, équipe
 - Arrivée des joueurs dans le lobby, barre de temps qui change de couleur, histogramme qui se remplit, classement qui se réordonne (layout animations de Framer Motion), podium qui monte avec confettis.
 - Toutes les animations respectent le réglage système « réduire les animations ».
 
+**Son**
+
+- Bips du compte à rebours 3, 2, 1 puis « top » au départ, tic-tac pendant les 5 dernières secondes (plus aigu sur les 3 dernières), une note par marche du podium puis une fanfare.
+- En solo : son de bonne ou de mauvaise réponse, fanfare pour un sans-faute ou un record.
+- Le son joue sur l'écran projeté et en solo, pas sur les téléphones des joueurs (vingt téléphones qui bipent en décalé, c'est la cacophonie). Bouton « Son » pour le couper, réglage mémorisé.
+
 ## Captures
 
 | Écran projeté et téléphone pendant une question            | Résultats de la question                            |
@@ -209,6 +215,7 @@ La CI GitHub Actions lance le formatage, le lint, le typage, les tests (avec un 
 - **Persistance en fin de partie, dans une transaction** : la partie se joue en mémoire (rapide), puis joueurs, réponses et classement sont écrits en une fois, tout ou rien.
 - **Sécurité** : mots de passe hachés, message d'erreur identique pour un email inconnu ou un mauvais mot de passe, limitation de débit sur l'authentification et les événements Socket.IO, en-têtes Helmet, protection contre l'injection de formules dans l'export CSV.
 - **Accessibilité** : chaque réponse a une lettre en plus de sa couleur, contrastes vérifiés, navigation au clavier (y compris pour réordonner les questions), annonces pour les lecteurs d'écran, animations réduites si demandé.
+- **Sons synthétisés avec la Web Audio API** : chaque effet est une petite suite de notes générée à la volée. Aucun fichier audio à charger ni licence à gérer, et le son n'est activé qu'après une interaction, comme l'exigent les navigateurs.
 - **Performance côté joueur** : les écrans de l'hôte sont chargés à la demande, ceux du joueur (accueil, partie) sont dans le bundle principal.
 
 ## Déploiement
