@@ -13,6 +13,7 @@ import { Leaderboard } from '../game/Leaderboard';
 import { LobbyPlayers } from '../game/LobbyPlayers';
 import { Podium } from '../game/Podium';
 import { QuestionImage } from '../game/QuestionImage';
+import { SoundToggle } from '../game/SoundToggle';
 import { StageShell } from '../game/StageShell';
 import { TimerBar } from '../game/TimerBar';
 import { useHostGame } from '../game/useGameSession';
@@ -158,6 +159,7 @@ export function HostGamePage() {
               {view.status === 'LOBBY' ? 'Annuler la partie' : 'Terminer'}
             </button>
           ) : null}
+          <SoundToggle />
           <FullscreenButton />
         </div>
       </header>
@@ -266,6 +268,7 @@ function HostView({
         <Countdown
           endsAt={view.endsAt}
           label={`Question ${view.questionIndex + 1} sur ${view.totalQuestions}`}
+          sound
         />
       );
 
@@ -286,6 +289,7 @@ function HostView({
             paused={view.paused}
             pausedRemainingMs={view.remainingMs}
             showSeconds
+            sound
           />
           <p className="text-xl font-bold" aria-live="polite">
             Réponses : {view.answeredCount} sur {view.playerCount}
@@ -354,7 +358,7 @@ function HostView({
       return (
         <div className="flex flex-1 flex-col items-center justify-end gap-8">
           <h1 className="font-display text-4xl font-extrabold sm:text-5xl">Podium</h1>
-          <Podium podium={view.podium} />
+          <Podium podium={view.podium} sound />
         </div>
       );
 

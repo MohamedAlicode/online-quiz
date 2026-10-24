@@ -2,7 +2,9 @@ import type { RankedPlayer } from '@quiz/shared';
 import confetti from 'canvas-confetti';
 import gsap from 'gsap';
 import { useLayoutEffect, useRef } from 'react';
+import { playSound } from '../lib/sound';
 import { prefersReducedMotion } from './motion';
+import { useSoundCue } from './useSound';
 
 const STEPS = [
   { rank: 2, height: 'h-40 sm:h-52', color: 'bg-lagoon' },
@@ -14,8 +16,13 @@ const STEPS = [
  * Podium animé avec une timeline GSAP : les marches montent (3e, 2e puis 1re),
  * les noms apparaissent, puis des confettis pour le vainqueur.
  */
-export function Podium({ podium }: { podium: RankedPlayer[] }) {
+// Hauteur de la note jouée à chaque marche : do (3e), mi (2e), sol (1re).
+const STEP_PITCH: Record<number, number> = { 3: 1, 2: 1.26, 1: 1.5 };
+
+export function Podium({ podium, sound = false }: { podium: RankedPlayer[]; sound?: boolean }) {
   const rootRef = useRef<HTMLDivElement>(null);
+  // Sans animation, la fanfare part tout de suite.
+  useSoundCue('fanfare', 'podium', sound && prefersReducedMotion());
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -26,6 +33,9 @@ export function Podium({ podium }: { podium: RankedPlayer[] }) {
       const timeline = gsap.timeline({ delay: 0.2 });
       for (const rank of [3, 2, 1]) {
         timeline
+          .call(() => {
+            if (sound) playSound('step', STEP_PITCH[rank]);
+          })
           .from(`[data-step="${rank}"]`, {
             scaleY: 0,
             transformOrigin: 'bottom',
@@ -40,6 +50,7 @@ export function Podium({ podium }: { podium: RankedPlayer[] }) {
           );
       }
       timeline.call(() => {
+        if (sound) playSound('fanfare');
         void confetti({
           particleCount: 160,
           spread: 90,
@@ -54,7 +65,7 @@ export function Podium({ podium }: { podium: RankedPlayer[] }) {
       context.revert();
       confetti.reset();
     };
-  }, []);
+  }, [sound]);
 
   return (
     <div ref={rootRef} className="flex w-full max-w-3xl items-end justify-center gap-3 sm:gap-5">

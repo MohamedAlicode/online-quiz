@@ -7,7 +7,9 @@ import { AnswerTile, type TileState } from '../game/AnswerTile';
 import { AutoNextHint } from '../game/AutoNextHint';
 import { Countdown } from '../game/Countdown';
 import { QuestionImage } from '../game/QuestionImage';
+import { SoundToggle } from '../game/SoundToggle';
 import { TimerBar } from '../game/TimerBar';
+import { useSoundCue } from '../game/useSound';
 import { api, errorMessage } from '../lib/api';
 import { plural } from '../lib/format';
 import {
@@ -98,17 +100,20 @@ export function PracticePage({ from }: { from: 'template' | 'quiz' }) {
           <Logo />
         </Link>
         {source ? <span className="font-bold text-white/85">{source.title}</span> : null}
-        {state.phase === 'question' || state.phase === 'feedback' ? (
-          <span className="ml-auto font-bold">
-            {state.mode === 'challenge'
-              ? `${state.score} pts`
-              : plural(
-                  state.answers.filter((answer) => answer.isCorrect).length,
-                  'bonne réponse',
-                  'bonnes réponses',
-                )}
-          </span>
-        ) : null}
+        <div className="ml-auto flex items-center gap-2">
+          {state.phase === 'question' || state.phase === 'feedback' ? (
+            <span className="font-bold">
+              {state.mode === 'challenge'
+                ? `${state.score} pts`
+                : plural(
+                    state.answers.filter((answer) => answer.isCorrect).length,
+                    'bonne réponse',
+                    'bonnes réponses',
+                  )}
+            </span>
+          ) : null}
+          <SoundToggle />
+        </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 pb-8">
@@ -217,7 +222,9 @@ function PracticeView({ source, state, onStart, onAnswer, onNext, ...actions }: 
       return <Intro source={source} onStart={onStart} />;
 
     case 'countdown':
-      return <Countdown endsAt={state.endsAt} label={`Question 1 sur ${state.questions.length}`} />;
+      return (
+        <Countdown endsAt={state.endsAt} label={`Question 1 sur ${state.questions.length}`} sound />
+      );
 
     case 'question':
     case 'feedback':
@@ -295,9 +302,10 @@ function QuestionStep({
   onNext: () => void;
 }) {
   const question = state.questions[state.index];
+  const answer = state.phase === 'feedback' ? state.answer : null;
+  useSoundCue(answer ? (answer.isCorrect ? 'correct' : 'wrong') : null, state.index);
   if (!question) return null;
   const isLast = state.index === state.questions.length - 1;
-  const answer = state.phase === 'feedback' ? state.answer : null;
   const correct = question.choices.find((choice) => choice.isCorrect);
 
   const tileState = (choiceId: string, isCorrect: boolean): TileState => {
@@ -317,6 +325,7 @@ function QuestionStep({
           totalMs={question.timeLimitSec * 1000}
           paused={false}
           pausedRemainingMs={0}
+          sound
         />
       ) : null}
       <h1 className="font-display text-2xl leading-snug font-extrabold sm:text-4xl">
@@ -403,6 +412,7 @@ function Summary({
   const total = state.questions.length;
   const missed = missedQuestions(state);
   const [record, setRecord] = useState(false);
+  useSoundCue('fanfare', 'summary', correctCount === total || record);
 
   // Meilleur score enregistré dans ce navigateur (mêmes questions : quiz complet seulement).
   useEffect(() => {

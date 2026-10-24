@@ -1,4 +1,6 @@
 import { displaySeconds } from '../lib/clock';
+import { useState } from 'react';
+import { useSoundCue } from './useSound';
 import { useRemainingMs } from './useRemainingMs';
 
 interface TimerBarProps {
@@ -8,6 +10,8 @@ interface TimerBarProps {
   pausedRemainingMs: number;
   /** Affiche aussi les secondes restantes en grands chiffres (écran de l'hôte). */
   showSeconds?: boolean;
+  /** « Top » au départ puis tic-tac pendant les 5 dernières secondes (écran projeté, solo). */
+  sound?: boolean;
 }
 
 /** Barre de temps fluide qui vire au jaune puis au rouge à l'approche de la fin. */
@@ -17,11 +21,17 @@ export function TimerBar({
   paused,
   pausedRemainingMs,
   showSeconds,
+  sound = false,
 }: TimerBarProps) {
   const ms = useRemainingMs(endsAt, paused, pausedRemainingMs);
+  // « Top » seulement si la question vient de commencer (pas après une reconnexion).
+  const [justStarted] = useState(() => ms >= totalMs - 1500);
+  useSoundCue('go', 'start', sound && justStarted);
   const ratio = totalMs > 0 ? Math.min(1, ms / totalMs) : 0;
   const color = ratio > 0.4 ? 'bg-white' : ratio > 0.15 ? 'bg-mustard' : 'bg-tomato';
   const seconds = displaySeconds(ms);
+  const ticking = sound && !paused && seconds >= 1 && seconds <= 5;
+  useSoundCue(ticking ? (seconds <= 3 ? 'tickUrgent' : 'tick') : null, seconds);
 
   return (
     <div className="flex items-center gap-4">

@@ -2,17 +2,27 @@ import gsap from 'gsap';
 import { useLayoutEffect, useRef } from 'react';
 import { displaySeconds } from '../lib/clock';
 import { prefersReducedMotion } from './motion';
+import { useSoundCue } from './useSound';
 import { useRemainingMs } from './useRemainingMs';
 
 /**
  * Compte à rebours 3, 2, 1 plein écran.
  * Chaque chiffre « s'étire » grâce à l'axe de largeur variable de la police Anybody,
- * piloté par une timeline GSAP (variable CSS --wdth).
+ * piloté par une timeline GSAP (variable CSS --wdth). Avec `sound`, un bip à chaque chiffre.
  */
-export function Countdown({ endsAt, label }: { endsAt: number; label: string }) {
+export function Countdown({
+  endsAt,
+  label,
+  sound = false,
+}: {
+  endsAt: number;
+  label: string;
+  sound?: boolean;
+}) {
   const ms = useRemainingMs(endsAt);
   const seconds = Math.max(1, displaySeconds(ms));
   const numberRef = useRef<HTMLSpanElement>(null);
+  useSoundCue('countdown', seconds, sound);
 
   useLayoutEffect(() => {
     const element = numberRef.current;
