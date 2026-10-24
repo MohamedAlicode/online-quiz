@@ -115,3 +115,21 @@ export interface QuizTemplateDto {
   /** Quelques images représentatives, pour l'aperçu dans la bibliothèque. */
   previewImages: string[];
 }
+
+/** Question d'entraînement en solo : la bonne réponse est connue du navigateur. */
+export interface PracticeQuestionDto {
+  id: string;
+  text: string;
+  imageUrl: string | null;
+  timeLimitSec: number;
+  basePoints: number;
+  choices: { id: string; text: string; isCorrect: boolean }[];
+  /** Phrase à retenir, affichée après la réponse (« Ottawa est la capitale du Canada. »). */
+  explanation: string | null;
+}
+
+export interface PracticeQuizDto {
+  title: string;
+  description: string;
+  questions: PracticeQuestionDto[];
+}

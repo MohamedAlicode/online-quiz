@@ -139,14 +139,32 @@ function buildQuestion(
   };
 }
 
+/** Phrase affichée après la réponse en mode entraînement, pour retenir la bonne réponse. */
+function explanation(definition: TemplateDefinition, country: Country): string {
+  return definition.kind === 'flag'
+    ? `C'est le drapeau ${country.of}.`
+    : `${country.capital} est la capitale ${country.of}.`;
+}
+
+export interface TemplateItem {
+  question: QuestionData;
+  explanation: string;
+}
+
+/** Questions d'une partie, avec l'explication de chaque réponse (mode entraînement). */
+export function buildTemplateItems(definition: TemplateDefinition, random: Random): TemplateItem[] {
+  const countries = pickCountries(definition, random);
+  return countries.map((country, index) => ({
+    question: buildQuestion(definition, country, random, index === countries.length - 1),
+    explanation: explanation(definition, country),
+  }));
+}
+
 export function buildTemplateQuestions(
   definition: TemplateDefinition,
   random: Random,
 ): QuestionData[] {
-  const countries = pickCountries(definition, random);
-  return countries.map((country, index) =>
-    buildQuestion(definition, country, random, index === countries.length - 1),
-  );
+  return buildTemplateItems(definition, random).map((item) => item.question);
 }
 
 export function findTemplate(slug: string): TemplateDefinition | undefined {
