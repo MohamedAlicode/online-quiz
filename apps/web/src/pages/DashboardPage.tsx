@@ -1,6 +1,7 @@
-import type { QuizDto, QuizSummaryDto } from '@quiz/shared';
+import type { QuizDto, QuizSummaryDto, QuizTemplateDto } from '@quiz/shared';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
+import { TemplateLibrary } from '../components/TemplateLibrary';
 import { Alert, Button, Spinner } from '../components/ui';
 import { api, errorMessage } from '../lib/api';
 import { formatDate, plural } from '../lib/format';
@@ -68,6 +69,27 @@ export function DashboardPage() {
       await load();
     });
 
+  /** Copie un quiz prêt à jouer dans le compte de l'hôte (nouveau tirage des pays). */
+  const importTemplate = async (template: QuizTemplateDto) => {
+    const { quiz } = await api<{ quiz: QuizDto }>(`/templates/${template.slug}/import`, {
+      method: 'POST',
+    });
+    return quiz;
+  };
+
+  const playTemplate = (template: QuizTemplateDto) =>
+    withBusy(`play:${template.slug}`, async () => {
+      const quiz = await importTemplate(template);
+      const { gameId } = await request(getSocket(token), 'host:create-game', { quizId: quiz.id });
+      navigate(`/host/game/${gameId}`);
+    });
+
+  const addTemplate = (template: QuizTemplateDto) =>
+    withBusy(`add:${template.slug}`, async () => {
+      const quiz = await importTemplate(template);
+      navigate(`/host/quizzes/${quiz.id}`);
+    });
+
   const remove = (quiz: QuizSummaryDto) => {
     if (!window.confirm(`Supprimer « ${quiz.title} » ? L’historique des parties est conservé.`))
       return;
@@ -97,8 +119,8 @@ export function DashboardPage() {
         <section className="rounded-3xl border-2 border-dashed border-line bg-white px-6 py-12 text-center">
           <h2 className="font-display text-2xl font-extrabold">Aucun quiz pour l’instant</h2>
           <p className="mx-auto mt-2 max-w-md text-ink-soft">
-            Crée ton premier quiz, ou commence avec un quiz d’exemple de cinq questions pour faire
-            un essai tout de suite.
+            Crée ton premier quiz, ou lance tout de suite un des quiz prêts à jouer ci-dessous :
+            drapeaux et capitales du monde.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button onClick={() => void createQuiz()} busy={busyId === 'new'}>
@@ -159,6 +181,12 @@ export function DashboardPage() {
           ))}
         </ul>
       )}
+
+      <TemplateLibrary
+        busyKey={busyId}
+        onPlay={(template) => void playTemplate(template)}
+        onAdd={(template) => void addTemplate(template)}
+      />
     </div>
   );
 }

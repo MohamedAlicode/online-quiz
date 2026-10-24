@@ -10,6 +10,7 @@ import { Histogram } from '../game/Histogram';
 import { Leaderboard } from '../game/Leaderboard';
 import { LobbyPlayers } from '../game/LobbyPlayers';
 import { Podium } from '../game/Podium';
+import { QuestionImage } from '../game/QuestionImage';
 import { StageShell } from '../game/StageShell';
 import { TimerBar } from '../game/TimerBar';
 import { useHostGame } from '../game/useGameSession';
@@ -227,16 +228,14 @@ function HostView({
 
     case 'QUESTION':
       return (
-        <div className="relative flex flex-1 flex-col gap-6">
+        <div
+          className={`relative flex flex-1 flex-col ${view.question.imageUrl ? 'gap-4' : 'gap-6'}`}
+        >
           <h1 className="max-w-5xl font-display text-3xl leading-tight font-extrabold sm:text-5xl">
             {view.question.text}
           </h1>
           {view.question.imageUrl ? (
-            <img
-              src={view.question.imageUrl}
-              alt=""
-              className="max-h-64 self-start rounded-2xl object-contain"
-            />
+            <QuestionImage src={view.question.imageUrl} size="stage" className="self-center" />
           ) : null}
           <TimerBar
             endsAt={view.endsAt}
@@ -250,7 +249,12 @@ function HostView({
           </p>
           <div className="mt-auto grid gap-4 md:grid-cols-2">
             {view.question.choices.map((choice, index) => (
-              <AnswerTile key={choice.id} index={index} text={choice.text} />
+              <AnswerTile
+                key={choice.id}
+                index={index}
+                text={choice.text}
+                compact={Boolean(view.question.imageUrl)}
+              />
             ))}
           </div>
           {view.paused ? (
@@ -264,9 +268,14 @@ function HostView({
     case 'RESULTS':
       return (
         <div className="flex flex-1 flex-col gap-6">
-          <h1 className="max-w-5xl font-display text-3xl leading-tight font-extrabold sm:text-4xl">
-            {view.question.text}
-          </h1>
+          <div className="flex items-center gap-5">
+            {view.question.imageUrl ? (
+              <QuestionImage src={view.question.imageUrl} size="small" />
+            ) : null}
+            <h1 className="max-w-5xl font-display text-3xl leading-tight font-extrabold sm:text-4xl">
+              {view.question.text}
+            </h1>
+          </div>
           <Histogram
             question={view.question}
             distribution={view.distribution}

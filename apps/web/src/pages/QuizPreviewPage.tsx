@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { Alert, Button, Spinner } from '../components/ui';
 import { AnswerTile } from '../game/AnswerTile';
+import { QuestionImage } from '../game/QuestionImage';
 import { api, errorMessage } from '../lib/api';
 
 /** Aperçu des questions telles qu'elles seront projetées, avant de lancer la partie. */
@@ -56,10 +57,10 @@ export function QuizPreviewPage() {
             {question.text}
           </h1>
           {question.imageUrl ? (
-            <img
+            <QuestionImage
               src={question.imageUrl}
-              alt=""
-              className="max-h-40 self-start rounded-2xl object-contain"
+              size="phone"
+              className="self-center sm:max-h-48"
             />
           ) : null}
           <div className="mt-auto grid gap-3 md:grid-cols-2">
