@@ -1,3 +1,4 @@
+import compression from 'compression';
 import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
@@ -11,6 +12,7 @@ import { staticWeb } from './middleware/static-web';
 import { authRouter } from './modules/auth/auth.routes';
 import { gamesRouter } from './modules/games/games.routes';
 import { questionRouter, quizRouter } from './modules/quizzes/quiz.routes';
+import { templatesRouter } from './modules/templates/templates.routes';
 
 export interface AppOptions {
   /** Dossier du front construit à servir sur la même origine que l'API (production). */
@@ -29,6 +31,8 @@ export function createApp(options: AppOptions = {}) {
       contentSecurityPolicy: false,
     }),
   );
+  // Compression gzip : les cartes SVG des quiz prêts à jouer pèsent 4 à 5 fois moins.
+  app.use(compression());
   app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
   app.use(express.json({ limit: '100kb' }));
 
@@ -60,6 +64,7 @@ export function createApp(options: AppOptions = {}) {
   app.use('/api/quizzes', quizRouter);
   app.use('/api/questions', questionRouter);
   app.use('/api/games', gamesRouter);
+  app.use('/api/templates', templatesRouter);
 
   const web = options.webDistPath ? staticWeb(options.webDistPath) : null;
   if (web) app.use(web);

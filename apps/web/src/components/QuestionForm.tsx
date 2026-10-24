@@ -182,14 +182,25 @@ export function QuestionForm({ initial, submitLabel, onSubmit, onCancel }: Quest
         />
       </div>
 
-      <TextField
-        label="Image (facultatif)"
-        type="url"
-        placeholder="https://…"
-        hint="Lien direct vers une image, affichée sur l’écran projeté."
-        value={draft.imageUrl}
-        onChange={(event) => patch({ imageUrl: event.target.value })}
-      />
+      <div className="flex items-end gap-4">
+        <TextField
+          className="flex-1"
+          label="Image (facultatif)"
+          type="text"
+          inputMode="url"
+          placeholder="https://…"
+          hint="Lien direct vers une image, affichée sur l’écran projeté et les téléphones."
+          value={draft.imageUrl}
+          onChange={(event) => patch({ imageUrl: event.target.value })}
+        />
+        {draft.imageUrl.trim() ? (
+          <img
+            src={draft.imageUrl.trim()}
+            alt="Aperçu de l’image"
+            className="mb-7 h-16 w-auto max-w-28 rounded-lg bg-stage object-contain"
+          />
+        ) : null}
+      </div>
 
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-1 font-bold">Réponses (coche la bonne)</legend>

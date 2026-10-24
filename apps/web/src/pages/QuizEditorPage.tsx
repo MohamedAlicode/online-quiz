@@ -278,13 +278,20 @@ function QuestionRow({
         </svg>
       </button>
       <span className="numerals w-6 text-xl font-black">{index + 1}</span>
+      {question.imageUrl ? (
+        <img
+          src={question.imageUrl}
+          alt=""
+          loading="lazy"
+          className="h-10 w-14 shrink-0 rounded-md bg-stage object-contain"
+        />
+      ) : null}
       <button type="button" onClick={onEdit} className="min-w-0 flex-1 text-left">
         <span className="block truncate font-bold">{question.text}</span>
-        <span className="text-sm text-ink-soft">
-          {question.type === 'TRUE_FALSE'
-            ? 'Vrai ou faux'
-            : plural(question.choices.length, 'réponse')}
-          , {question.timeLimitSec} s
+        <span className="block truncate text-sm text-ink-soft">
+          {/* La bonne réponse d'abord : les questions des quiz drapeaux ont toutes le même intitulé. */}
+          Réponse : {question.choices.find((choice) => choice.isCorrect)?.text ?? '–'},{' '}
+          {question.timeLimitSec} s{question.type === 'TRUE_FALSE' ? ', vrai ou faux' : ''}
           {question.basePoints === 2000
             ? ', points doubles'
             : question.basePoints === 0

@@ -15,6 +15,7 @@ Projet pensé pour animer un groupe (centre de loisirs, classe, soirée, équipe
 - Inscription et connexion sécurisées (JWT, mots de passe hachés avec bcrypt).
 - Création de quiz : questions à choix unique (2 à 4 réponses) ou vrai/faux, temps de 5 à 60 s, points standard, doubles ou nuls, image facultative.
 - Réordonnancement des questions par glisser-déposer (avec une alternative au clavier), duplication de quiz, aperçu avant lancement, quiz d'exemple en un clic.
+- **Quiz prêts à jouer** : drapeaux et capitales d'Europe et du monde, avec un drapeau ou une carte de situation pour chaque question. Les pays sont tirés au hasard à chaque partie (en alternant les continents), les mauvaises réponses viennent de la même région et la dernière question compte double. « Jouer maintenant » lance la partie en un clic, « Ajouter à mes quiz » crée une copie modifiable.
 - Pilotage de la partie : lobby avec code et QR code, exclusion d'un joueur, pause et reprise, question suivante (bouton ou flèche droite du clavier), fin anticipée, mode plein écran.
 - Historique des parties, classement final, taux de réussite par question, questions les plus ratées et export CSV.
 
@@ -215,7 +216,13 @@ L'image se construit depuis la racine : `docker build -f apps/server/Dockerfile 
 
 - Les parties actives sont en mémoire : une seule instance du serveur. Pour passer à plusieurs instances, il faudrait partager l'état (Redis et l'adaptateur Redis de Socket.IO).
 - Le jeton de l'hôte est stocké dans le `localStorage` ; un cookie `httpOnly` serait plus robuste face au XSS.
-- Prévu ensuite : questions à choix multiple et à réponse libre, mode équipes, import de quiz en CSV, bibliothèque de quiz publics, sons.
+- Prévu ensuite : questions à choix multiple et à réponse libre, mode équipes, import de quiz en CSV, d'autres quiz prêts à jouer (monuments, langues), sons.
+
+## Crédits
+
+- Drapeaux : [flag-icons](https://github.com/lipis/flag-icons) (licence MIT).
+- Cartes de situation : générées par `scripts/generate-quiz-images.ts` à partir de [@svg-maps/world](https://github.com/VictorCazanave/svg-maps) (licence CC BY 4.0, Victor Cazanave).
+- Polices : Anybody et Atkinson Hyperlegible (SIL Open Font License).
 
 ## Organisation du dépôt
 
@@ -226,6 +233,7 @@ apps/
 packages/
   shared/   schémas Zod, types, calcul des scores et du classement
 docs/       captures et GIF de démonstration
+scripts/    génération des images des quiz prêts à jouer
 ```
 
 Le cahier des charges complet est dans [SPEC.md](SPEC.md) et les conventions du projet dans [CLAUDE.md](CLAUDE.md).

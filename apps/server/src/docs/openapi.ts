@@ -50,6 +50,7 @@ export const openApiDocument = {
     { name: 'Quiz' },
     { name: 'Questions' },
     { name: 'Parties' },
+    { name: 'Quiz prêts à jouer' },
   ],
   components: {
     securitySchemes: {
@@ -187,6 +188,19 @@ export const openApiDocument = {
           startedAt: { type: 'string', format: 'date-time' },
           endedAt: { type: ['string', 'null'], format: 'date-time' },
           playerCount: { type: 'integer' },
+        },
+      },
+      QuizTemplate: {
+        type: 'object',
+        properties: {
+          slug: { type: 'string', example: 'capitales-monde' },
+          title: { type: 'string' },
+          description: { type: 'string' },
+          questionCount: { type: 'integer' },
+          previewImages: {
+            type: 'array',
+            items: { type: 'string', example: '/quiz-images/flags/fr.svg' },
+          },
         },
       },
       GameResults: {
@@ -380,6 +394,26 @@ export const openApiDocument = {
         summary: 'Supprimer une question',
         security: bearer,
         responses: { 204: { description: 'Supprimée' } },
+      },
+    },
+    '/api/templates': {
+      get: {
+        tags: ['Quiz prêts à jouer'],
+        summary: 'Lister les quiz prêts à jouer (drapeaux, capitales…)',
+        security: bearer,
+        responses: { 200: { description: 'Liste', ...wrapped('templates', 'QuizTemplate', true) } },
+      },
+    },
+    '/api/templates/{slug}/import': {
+      parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
+      post: {
+        tags: ['Quiz prêts à jouer'],
+        summary: 'Ajouter une copie du quiz (pays tirés au hasard) à ses quiz',
+        security: bearer,
+        responses: {
+          201: { description: 'Quiz créé', ...wrapped('quiz', 'Quiz') },
+          404: errorResponse('Modèle introuvable'),
+        },
       },
     },
     '/api/games': {

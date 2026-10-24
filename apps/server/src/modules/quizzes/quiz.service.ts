@@ -76,6 +76,36 @@ export async function createQuiz(userId: string, input: QuizData): Promise<QuizD
   return toQuizDto(quiz);
 }
 
+/** Crée un quiz complet (questions et réponses) en une seule requête. */
+export async function createQuizWithQuestions(
+  userId: string,
+  input: Omit<QuizData, 'isPublic'> & { isPublic?: boolean },
+  questions: QuestionData[],
+): Promise<QuizDto> {
+  if (questions.length > LIMITS.maxQuestionsPerQuiz) {
+    throw HttpError.badRequest(`Un quiz est limité à ${LIMITS.maxQuestionsPerQuiz} questions`);
+  }
+  const quiz = await prisma.quiz.create({
+    data: {
+      ...input,
+      ownerId: userId,
+      questions: {
+        create: questions.map((question, position) => ({
+          type: question.type,
+          text: question.text,
+          imageUrl: question.imageUrl,
+          timeLimitSec: question.timeLimitSec,
+          basePoints: question.basePoints,
+          position,
+          choices: { create: choicesData(question) },
+        })),
+      },
+    },
+    include: withQuestions,
+  });
+  return toQuizDto(quiz);
+}
+
 export async function updateQuiz(
   userId: string,
   quizId: string,

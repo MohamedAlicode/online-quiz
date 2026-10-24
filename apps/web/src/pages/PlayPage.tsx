@@ -7,6 +7,7 @@ import { answerStyle, playerColor } from '../lib/answers';
 import { clearPlayerSession } from '../lib/player-session';
 import { AnswerTile } from '../game/AnswerTile';
 import { Countdown } from '../game/Countdown';
+import { QuestionImage } from '../game/QuestionImage';
 import { StageShell } from '../game/StageShell';
 import { TimerBar } from '../game/TimerBar';
 import { usePlayerGame } from '../game/useGameSession';
@@ -255,6 +256,9 @@ function QuestionScreen({
         pausedRemainingMs={view.remainingMs}
       />
       <h1 className="font-display text-2xl leading-snug font-extrabold">{view.question.text}</h1>
+      {view.question.imageUrl ? (
+        <QuestionImage src={view.question.imageUrl} size="phone" className="self-center" />
+      ) : null}
       {error ? (
         <p role="alert" className="rounded-xl bg-ink px-4 py-2 font-bold">
           {error}

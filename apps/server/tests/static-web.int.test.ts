@@ -12,6 +12,11 @@ beforeAll(() => {
   mkdirSync(join(distPath, 'assets'));
   writeFileSync(join(distPath, 'index.html'), '<!doctype html><title>Quiz Live</title>');
   writeFileSync(join(distPath, 'assets', 'app-abc123.js'), 'console.log("ok")');
+  mkdirSync(join(distPath, 'quiz-images', 'maps'), { recursive: true });
+  writeFileSync(
+    join(distPath, 'quiz-images', 'maps', 'fr.svg'),
+    `<svg xmlns="http://www.w3.org/2000/svg">${'<path d="M0 0h10v10z"/>'.repeat(200)}</svg>`,
+  );
 });
 
 afterAll(() => rmSync(distPath, { recursive: true, force: true }));
@@ -30,6 +35,15 @@ describe('service du front par le serveur (déploiement en un seul service)', ()
   it('sert les fichiers statiques avec un cache long', async () => {
     const response = await request(app()).get('/assets/app-abc123.js').expect(200);
     expect(response.headers['cache-control']).toContain('immutable');
+  });
+
+  it('compresse les images SVG (gzip)', async () => {
+    const response = await request(app())
+      .get('/quiz-images/maps/fr.svg')
+      .set('Accept-Encoding', 'gzip')
+      .expect(200);
+    expect(response.headers['content-type']).toContain('image/svg+xml');
+    expect(response.headers['content-encoding']).toBe('gzip');
   });
 
   it("laisse l'API répondre en JSON, y compris pour une route inconnue", async () => {

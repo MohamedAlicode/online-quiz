@@ -11,6 +11,8 @@ interface AnswerTileProps {
   onSelect?: () => void;
   disabled?: boolean;
   size?: 'stage' | 'phone';
+  /** Tuiles moins hautes quand la question a une image, pour tout garder à l'écran. */
+  compact?: boolean;
 }
 
 const STATE_CLASSES: Record<TileState, string> = {
@@ -32,6 +34,7 @@ export function AnswerTile({
   onSelect,
   disabled,
   size = 'stage',
+  compact = false,
 }: AnswerTileProps) {
   const style = answerStyle(index);
   const textSize = size === 'stage' ? 'text-2xl lg:text-3xl' : 'text-2xl';
@@ -63,7 +66,7 @@ export function AnswerTile({
         layout
         animate={state === 'correct' ? { scale: [1, 1.04, 1] } : { scale: 1 }}
         transition={{ duration: 0.5 }}
-        className={`${base} min-h-24 lg:min-h-32`}
+        className={`${base} ${compact ? 'min-h-20 lg:min-h-24' : 'min-h-24 lg:min-h-32'}`}
       >
         <span className="sr-only">Réponse {style.letter} : </span>
         {content}
