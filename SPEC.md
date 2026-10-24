@@ -138,6 +138,7 @@ Règles : la bonne réponse n'est **jamais** envoyée avant la fin de la questio
 - Classement avec réordonnancement animé (layout animations de Framer Motion).
 - Podium : montée des 3 marches, apparition des noms, confettis.
 - Transitions de pages douces ; respect de `prefers-reduced-motion`.
+- **Son** (Web Audio API, sans fichier) sur l'écran projeté et en solo : bips 3-2-1 et « top », tic-tac des 5 dernières secondes, notes des marches du podium et fanfare, bonne/mauvaise réponse en solo. Bouton pour couper, réglage mémorisé ; rien sur les téléphones des joueurs.
 
 ## 10. Qualité et déploiement
 
