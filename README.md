@@ -4,7 +4,9 @@ Quiz multijoueur en temps réel : l'animateur projette les questions sur grand �
 
 Projet pensé pour animer un groupe (centre de loisirs, classe, soirée, équipe) et conçu comme une vitrine technique : temps réel, logique métier testée, animations soignées et accessibilité.
 
-![Démonstration d'une partie : écran projeté à gauche, téléphone d'un joueur à droite](docs/demo.gif)
+![Démonstration d'une partie : les joueurs arrivent dans le lobby, compte à rebours, question, les plus rapides marquent le plus de points, puis podium avec confettis. Écran projeté à gauche, téléphone d'une joueuse à droite](docs/demo.gif)
+
+<sub>Le GIF est muet : en vrai, le compte à rebours, le tic-tac des dernières secondes et la fanfare du podium ont du son.</sub>
 
 > **Démo en ligne : <https://quiz-live-hk3r.onrender.com>** (hébergement gratuit : la première ouverture peut prendre une trentaine de secondes, le temps que le serveur se réveille).
 
@@ -48,11 +50,17 @@ Projet pensé pour animer un groupe (centre de loisirs, classe, soirée, équipe
 
 ## Captures
 
-| Écran projeté et téléphone pendant une question            | Résultats de la question                            |
-| ---------------------------------------------------------- | --------------------------------------------------- |
-| ![Question en cours](docs/screenshots/partie-question.png) | ![Résultats](docs/screenshots/partie-resultats.png) |
-| **Éditeur de quiz**                                        | **Statistiques après la partie**                    |
-| ![Éditeur](docs/screenshots/editeur.png)                   | ![Statistiques](docs/screenshots/resultats.png)     |
+| Lobby : code, QR code et joueurs qui arrivent       | Question en cours sur l'écran et le téléphone              |
+| --------------------------------------------------- | ---------------------------------------------------------- |
+| ![Lobby](docs/screenshots/partie-lobby.png)         | ![Question en cours](docs/screenshots/partie-question.png) |
+| **Résultats : les plus rapides marquent le plus**   | **Podium en fête**                                         |
+| ![Résultats](docs/screenshots/partie-resultats.png) | ![Podium](docs/screenshots/partie-podium.png)              |
+| **Éditeur de quiz**                                 | **Statistiques après la partie**                           |
+| ![Éditeur](docs/screenshots/editeur.png)            | ![Statistiques](docs/screenshots/resultats.png)            |
+
+**Entraînement en solo sur téléphone** : mode « Apprendre », correction expliquée, bilan et révision des erreurs.
+
+<img src="docs/solo.gif" width="300" alt="Entraînement en solo : choix du quiz, mode Apprendre, bonne réponse avec explication, erreur corrigée, bilan 9 sur 10 avec Revoir mes erreurs">
 
 ## Stack technique
 
