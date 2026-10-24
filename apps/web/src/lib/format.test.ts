@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatPercent, plural } from './format';
+import { formatPercent, formatSeconds, plural } from './format';
 import { answerStyle, playerColor } from './answers';
 
 describe('formatage', () => {
@@ -12,6 +12,12 @@ describe('formatage', () => {
 
   it('affiche un pourcentage arrondi', () => {
     expect(formatPercent(0.666)).toBe('67 %');
+  });
+
+  it('affiche un temps de réponse en secondes, à la française', () => {
+    expect(formatSeconds(1234)).toBe('1,2 s');
+    expect(formatSeconds(0)).toBe('0,0 s');
+    expect(formatSeconds(-50)).toBe('0,0 s');
   });
 });
 

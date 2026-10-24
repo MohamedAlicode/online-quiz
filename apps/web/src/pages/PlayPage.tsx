@@ -158,6 +158,13 @@ function PlayerView({
                 La bonne réponse était {answerStyle(correctIndex).letter} : {correct?.text}
               </p>
             )}
+            {result.isCorrect && result.speedRank ? (
+              <p className="text-xl font-bold">
+                {result.speedRank === 1
+                  ? 'Le plus rapide à trouver !'
+                  : `${result.speedRank}e plus rapide à trouver`}
+              </p>
+            ) : null}
             {result.isCorrect && result.streak >= 2 ? (
               <p className="rounded-full bg-ink px-4 py-1.5 font-bold">
                 Série de {result.streak} bonnes réponses (+{result.streakBonus})
